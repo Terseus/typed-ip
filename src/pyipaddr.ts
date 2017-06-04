@@ -1,0 +1,67 @@
+const IPV4_LENGTH = 32;
+const IPV4_MAX_VALUE = (2 ** IPV4_LENGTH);
+const IPV6_LENGTH = 128;
+const DECIMAL_DIGITS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+
+
+export class AddressValueError extends Error {
+    constructor(address: string | number) {
+        super("Invalid address: " + address);
+    }
+}
+
+
+export function ipv4_string_to_number(address: string) {
+        let octets = address.split('.');
+        if (octets.length !== 4) {
+            throw new AddressValueError(address);
+        }
+
+        if (!octets.every(
+            octet => Array.from(octet).every(
+                digit => DECIMAL_DIGITS.includes(digit)
+            )
+        )) {
+            throw new AddressValueError(address);
+        }
+
+        let numberOctets = octets.map(octet => parseInt(octet));
+        if (!numberOctets.every(
+            octet => octet >= 0 && octet <= 255
+        )) {
+            throw new AddressValueError(address);
+        }
+
+        return (numberOctets[0] * (256 ** 3) +
+                numberOctets[1] * (256 ** 2) +
+                numberOctets[2] * (256 ** 1) +
+                numberOctets[3]);
+}
+
+
+export class IPv4Address {
+    private _ip_number = 0;
+
+    public constructor(address: string | number) {
+        if (typeof address === "number") {
+            this._constructor_from_number(address);
+        } else if (typeof address === "string") {
+            this._constructor_from_string(address);
+        }
+    }
+
+    get ip_number() {
+        return this._ip_number;
+    }
+
+    private _constructor_from_number(address: number) {
+        if (address < 0 || address > IPV4_MAX_VALUE) {
+            throw new AddressValueError(address);
+        }
+        this._ip_number = address;
+    }
+
+    private _constructor_from_string(address: string) {
+        this._ip_number = ipv4_string_to_number(address);
+    }
+}
