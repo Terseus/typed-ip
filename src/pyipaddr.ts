@@ -1,5 +1,5 @@
 const IPV4_LENGTH = 32;
-const IPV4_MAX_VALUE = (2 ** IPV4_LENGTH);
+const IPV4_MAX_VALUE = (2 ** IPV4_LENGTH) - 1;
 const IPV6_LENGTH = 128;
 const DECIMAL_DIGITS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
@@ -39,8 +39,23 @@ export function ipv4_string_to_number(address: string) {
 }
 
 
+export function ipv4_number_to_string(address: number) {
+    if (address < 0 || address > IPV4_MAX_VALUE) {
+        throw new AddressValueError(address);
+    }
+
+    return [
+        '' + ((address >> 24) & 0xff),
+        '' + ((address >> 16) & 0xff),
+        '' + ((address >> 8) & 0xff),
+        '' + (address & 0xff)
+    ].join('.');
+}
+
+
 export class IPv4Address {
-    private _ip_number = 0;
+    private _ip_number: number;
+    private _ip_string: string;
 
     public constructor(address: string | number) {
         if (typeof address === "number") {
@@ -54,14 +69,17 @@ export class IPv4Address {
         return this._ip_number;
     }
 
+    get ip_string() {
+        return this._ip_string;
+    }
+
     private _constructor_from_number(address: number) {
-        if (address < 0 || address > IPV4_MAX_VALUE) {
-            throw new AddressValueError(address);
-        }
+        this._ip_string = ipv4_number_to_string(address);
         this._ip_number = address;
     }
 
     private _constructor_from_string(address: string) {
         this._ip_number = ipv4_string_to_number(address);
+        this._ip_string = address;
     }
 }
