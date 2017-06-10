@@ -14,8 +14,8 @@ describe("IPv4Address", function () {
         it('should accept valid strings values', function () {
             for (let ipString in IPV4_VALID) {
                 let ip = new IPv4(ipString);
-                assert.equal(ip.ip_number, IPV4_VALID[ipString]);
-                assert.equal(ip.ip_string, ipString);
+                assert.equal(ip.ipNumber, IPV4_VALID[ipString]);
+                assert.equal(ip.ipString, ipString);
             }
         });
         it('should reject invalid string values', function () {
@@ -30,8 +30,8 @@ describe("IPv4Address", function () {
         it('should accept valid number values', function () {
             for (let ipString in IPV4_VALID) {
                 let ip = new IPv4(ipString);
-                assert.equal(ip.ip_string, ipString);
-                assert.equal(ip.ip_number, IPV4_VALID[ipString]);
+                assert.equal(ip.ipString, ipString);
+                assert.equal(ip.ipNumber, IPV4_VALID[ipString]);
             }
         });
         it('should reject invalid number values', function () {
