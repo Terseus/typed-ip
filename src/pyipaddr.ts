@@ -1,7 +1,7 @@
-const IPV4_LENGTH = 32;
-const IPV4_MAX_VALUE = (2 ** IPV4_LENGTH) - 1;
-const IPV6_LENGTH = 128;
 const DECIMAL_DIGITS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+
+export const IPV4_LENGTH = 32;
+export const IPV4_MAX_VALUE = (2 ** IPV4_LENGTH) - 1;
 
 
 export class AddressValueError extends Error {
@@ -81,5 +81,45 @@ export class IPv4Address {
     private _constructor_from_string(address: string) {
         this._ip_number = ipv4_string_to_number(address);
         this._ip_string = address;
+    }
+
+    public eq(other: IPv4Address) {
+        return this.ip_number == other.ip_number;
+    }
+
+    public ne(other: IPv4Address) {
+        return this.ip_number != other.ip_number;
+    }
+
+    public gt(other: IPv4Address) {
+        return this.ip_number > other.ip_number;
+    }
+
+    public lt(other: IPv4Address) {
+        return this.ip_number < other.ip_number;
+    }
+
+    public ge(other: IPv4Address) {
+        return this.ip_number >= other.ip_number;
+    }
+
+    public le(other: IPv4Address) {
+        return this.ip_number <= other.ip_number;
+    }
+
+    public add(amount: number) {
+        return new IPv4Address(this.ip_number + amount);
+    }
+
+    public substract(amount: number) {
+        return new IPv4Address(this.ip_number - amount);
+    }
+
+    public toString() {
+        return this.ip_string;
+    }
+
+    public valueOf() {
+        return this.ip_number;
     }
 }
