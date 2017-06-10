@@ -2,12 +2,36 @@ const assert = require('assert');
 const ipaddr = require('../src/pyipaddr');
 const IPv4 = ipaddr.IPv4Address;
 
+
 const IPV4_VALID = {
     '127.0.0.1': 2130706433,
     '192.168.0.1': 3232235521,
     '0.0.0.0': 0,
     '255.255.255.255': ipaddr.IPV4_MAX_VALUE,
 };
+
+
+function compareArray(array1, array2) {
+    if (array1.length !== array2.length) {
+        return false;
+    }
+
+    for (let index = 0; index < array1.length; index++) {
+        if (array1[index] !== array2[index]) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
+function assertArrayEquals(original, expected, message) {
+    if (!compareArray(original, expected)) {
+        throw new Error(message || JSON.stringify(original) + " - " + JSON.stringify(expected));
+    }
+}
+
 
 describe("IPv4Address", function () {
     describe("constructor from string", function () {
@@ -79,4 +103,10 @@ describe("IPv4Address", function () {
             assert(!new IPv4('127.0.0.1').le(new IPv4('127.0.0.0')));
         });
     });
+    describe("octets", function () {
+        it('should return correct octets', function () {
+            assertArrayEquals(new IPv4('127.0.0.1').octets, [127, 0, 0, 1]);
+            assertArrayEquals(new IPv4('255.255.255.255').octets, [255, 255, 255, 255]);
+        })
+    })
 });

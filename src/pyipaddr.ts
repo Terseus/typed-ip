@@ -72,6 +72,10 @@ export class IPv4Address {
         return this._ipString;
     }
 
+    get octets() {
+        return this._ipString.split(".").map((octet) => parseInt(octet, 10));
+    }
+
     public eq(other: IPv4Address) {
         return this._ipNumber === other._ipNumber;
     }
