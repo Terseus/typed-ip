@@ -147,6 +147,8 @@ export class IPv4Network {
     private _address: IPv4Address;
     private _netmask: IPv4Address;
     private _prefix: number;
+    private _hostmask: IPv4Address;
+    private _broadcast: IPv4Address;
 
     public constructor(address: string) {
         const [subaddress, subnetmask, nothing] = address.split("/");
@@ -190,5 +192,26 @@ export class IPv4Network {
         }
 
         return this._prefix;
+    }
+
+    get hostmask() {
+        if (typeof this._hostmask === "undefined") {
+            this._hostmask = new IPv4Address(this._netmask.octets.map((octet) => ~octet & 0xff).join("."));
+        }
+
+        return this._hostmask;
+    }
+
+    get broadcast() {
+        if (typeof this._broadcast === "undefined") {
+            this._broadcast = new IPv4Address([
+                this._address.octets[0] | this.hostmask.octets[0],
+                this._address.octets[1] | this.hostmask.octets[1],
+                this._address.octets[2] | this.hostmask.octets[2],
+                this._address.octets[3] | this.hostmask.octets[3],
+            ].join("."));
+        }
+
+        return this._broadcast;
     }
 }

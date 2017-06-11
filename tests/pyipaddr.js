@@ -18,18 +18,30 @@ const IPV4_NETWORKS_VALID = (function () {
         prefix: 24,
         stringNetmask: '255.255.255.0',
         numberNetmask: 4294967040,
+        stringHostmask: '0.0.0.255',
+        numberHostmask: 255,
+        stringBroadcast: '192.168.0.255',
+        numberBroadcast: 3232235775,
     }, {
         stringAddress: '10.0.0.0',
         numberAddress: 167772160,
         prefix: 8,
         stringNetmask: '255.0.0.0',
         numberNetmask: 4278190080,
+        stringHostmask: '0.255.255.255',
+        numberHostmask: 16777215,
+        stringBroadcast: '10.255.255.255',
+        numberBroadcast: 184549375,
     }, {
         stringAddress: '148.56.0.0',
         numberAddress: 2486697984,
         prefix: 20,
         stringNetmask: '255.255.240.0',
         numberNetmask: 4294963200,
+        stringHostmask: '0.0.15.255',
+        numberHostmask: 4095,
+        stringBroadcast: '148.56.15.255',
+        numberBroadcast: 2486702079,
     }].map((network) => {
         network.inputPrefix = `${network.stringAddress}/${network.prefix}`;
         network.inputAddress = `${network.stringAddress}/${network.stringNetmask}`;
@@ -61,11 +73,15 @@ function assertArrayEquals(original, expected, message) {
 
 
 function assertNetworkCheck(net, data) {
-    assert.equal(net.address.ipNumber, data.numberAddress);
     assert.equal(net.address.ipString, data.stringAddress);
-    assert.equal(net.netmask.ipNumber, data.numberNetmask);
+    assert.equal(net.address.ipNumber, data.numberAddress);
     assert.equal(net.netmask.ipString, data.stringNetmask);
+    assert.equal(net.netmask.ipNumber, data.numberNetmask);
     assert.equal(net.prefix, data.prefix);
+    assert.equal(net.hostmask.ipString, data.stringHostmask);
+    assert.equal(net.hostmask.ipNumber, data.numberHostmask);
+    assert.equal(net.broadcast.ipString, data.stringBroadcast);
+    assert.equal(net.broadcast.ipNumber, data.numberBroadcast);
 }
 
 
