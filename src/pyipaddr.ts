@@ -73,6 +73,7 @@ export function ipv4_number_to_string(address: number) {
 export class IPv4Address {
     private _ipNumber: number;
     private _ipString: string;
+    private _octets: number[];
 
     public constructor(address: string | number) {
         if (typeof address === "number") {
@@ -93,7 +94,11 @@ export class IPv4Address {
     }
 
     get octets() {
-        return this._ipString.split(".").map((octet) => parseInt(octet, 10));
+        if (typeof this._octets === "undefined") {
+            this._octets = this._ipString.split(".").map((octet) => parseInt(octet, 10));
+        }
+
+        return this._octets;
     }
 
     public eq(other: IPv4Address) {
