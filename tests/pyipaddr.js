@@ -22,6 +22,7 @@ const IPV4_NETWORKS_VALID = (function () {
         numberHostmask: 255,
         stringBroadcast: '192.168.0.255',
         numberBroadcast: 3232235775,
+        numAddresses: 256,
     }, {
         stringAddress: '10.0.0.0',
         numberAddress: 167772160,
@@ -32,6 +33,7 @@ const IPV4_NETWORKS_VALID = (function () {
         numberHostmask: 16777215,
         stringBroadcast: '10.255.255.255',
         numberBroadcast: 184549375,
+        numAddresses: 16777216,
     }, {
         stringAddress: '148.56.0.0',
         numberAddress: 2486697984,
@@ -42,6 +44,7 @@ const IPV4_NETWORKS_VALID = (function () {
         numberHostmask: 4095,
         stringBroadcast: '148.56.15.255',
         numberBroadcast: 2486702079,
+        numAddresses: 4096,
     }].map((network) => {
         network.inputPrefix = `${network.stringAddress}/${network.prefix}`;
         network.inputAddress = `${network.stringAddress}/${network.stringNetmask}`;
@@ -82,6 +85,7 @@ function assertNetworkCheck(net, data) {
     assert.equal(net.hostmask.ipNumber, data.numberHostmask);
     assert.equal(net.broadcast.ipString, data.stringBroadcast);
     assert.equal(net.broadcast.ipNumber, data.numberBroadcast);
+    assert.equal(net.numAddresses, data.numAddresses);
 }
 
 

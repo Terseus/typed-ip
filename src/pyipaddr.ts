@@ -214,4 +214,8 @@ export class IPv4Network {
 
         return this._broadcast;
     }
+
+    get numAddresses() {
+        return this.hostmask.ipNumber + 1;
+    }
 }
