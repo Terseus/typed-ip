@@ -1,6 +1,7 @@
 const assert = require('assert');
 const ipaddr = require('../src/pyipaddr');
 const IPv4 = ipaddr.IPv4Address;
+const Netv4 = ipaddr.IPv4Network;
 
 
 const IPV4_VALID = {
@@ -9,6 +10,32 @@ const IPV4_VALID = {
     '0.0.0.0': 0,
     '255.255.255.255': ipaddr.IPV4_MAX_VALUE,
 };
+
+const IPV4_NETWORKS_VALID = (function () {
+    return [{
+        stringAddress: '192.168.0.0',
+        numberAddress: 3232235520,
+        prefix: 24,
+        stringNetmask: '255.255.255.0',
+        numberNetmask: 4294967040,
+    }, {
+        stringAddress: '10.0.0.0',
+        numberAddress: 167772160,
+        prefix: 8,
+        stringNetmask: '255.0.0.0',
+        numberNetmask: 4278190080,
+    }, {
+        stringAddress: '148.56.0.0',
+        numberAddress: 2486697984,
+        prefix: 20,
+        stringNetmask: '255.255.240.0',
+        numberNetmask: 4294963200,
+    }].map((network) => {
+        network.inputPrefix = `${network.stringAddress}/${network.prefix}`;
+        network.inputAddress = `${network.stringAddress}/${network.stringNetmask}`;
+        return network;
+    });
+}());
 
 
 function compareArray(array1, array2) {
@@ -30,6 +57,15 @@ function assertArrayEquals(original, expected, message) {
     if (!compareArray(original, expected)) {
         throw new Error(message || JSON.stringify(original) + " - " + JSON.stringify(expected));
     }
+}
+
+
+function assertNetworkCheck(net, data) {
+    assert.equal(net.address.ipNumber, data.numberAddress);
+    assert.equal(net.address.ipString, data.stringAddress);
+    assert.equal(net.netmask.ipNumber, data.numberNetmask);
+    assert.equal(net.netmask.ipString, data.stringNetmask);
+    assert.equal(net.prefix, data.prefix);
 }
 
 
@@ -109,4 +145,22 @@ describe("IPv4Address", function () {
             assertArrayEquals(new IPv4('255.255.255.255').octets, [255, 255, 255, 255]);
         })
     })
+});
+
+
+describe('IPv4Network', function () {
+    describe('constructor with prefix netmask', function () {
+        it('should accept valid values', function () {
+            IPV4_NETWORKS_VALID.forEach(
+                (data) => assertNetworkCheck(new Netv4(data.inputPrefix), data),
+            );
+        });
+    });
+    describe('constructor with address netmask', function () {
+        it('should accept valid values', function () {
+            IPV4_NETWORKS_VALID.forEach(
+                (data) => assertNetworkCheck(new Netv4(data.inputAddress), data),
+            );
+        });
+    });
 });
