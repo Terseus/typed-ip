@@ -3,7 +3,7 @@
     "version": "0.0.1",
     "scripts": {
         "lint": "tslint",
-        "test": "tslint src/**/*.ts && tsc && mocha tests/*.js",
+        "test": "tsc && mocha tests/*.js",
         "build": "tsc && babel src/*.js -d lib"
     },
     "devDependencies": {

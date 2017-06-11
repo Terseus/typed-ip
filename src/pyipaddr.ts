@@ -30,7 +30,7 @@ export class NetmaskValueError extends Error {
 }
 
 
-export function ipv4_string_to_number(address: string) {
+function ipv4_string_to_number(address: string) {
         const octets = address.split(".");
         if (octets.length !== 4) {
             throw new AddressValueError(address);
@@ -56,7 +56,7 @@ export function ipv4_string_to_number(address: string) {
 }
 
 
-export function ipv4_number_to_string(address: number) {
+function ipv4_number_to_string(address: number) {
     if (address < 0 || address > IPV4_MAX_VALUE) {
         throw new AddressValueError(address);
     }
