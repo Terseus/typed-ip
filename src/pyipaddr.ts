@@ -30,115 +30,107 @@ export class NetmaskValueError extends Error {
 }
 
 
-function ipv4_string_to_number(address: string) {
-        const octets = address.split(".");
-        if (octets.length !== 4) {
-            throw new AddressValueError(address);
-        }
-
-        if (!octets.every(
-            (octet) => Array.from(octet).every(
-                (digit) => DECIMAL_DIGITS.includes(digit),
-            ),
-        )) {
-            throw new AddressValueError(address);
-        }
-
-        const numberOctets = octets.map((octet) => parseInt(octet, 10));
-        if (!numberOctets.every((octet) => octet >= 0 && octet <= 255)) {
-            throw new AddressValueError(address);
-        }
-
-        return (numberOctets[0] * (256 ** 3) +
-                numberOctets[1] * (256 ** 2) +
-                numberOctets[2] * (256 ** 1) +
-                numberOctets[3]);
-}
-
-
-function ipv4_number_to_string(address: number) {
-    if (address < 0 || address > IPV4_MAX_VALUE) {
-        throw new AddressValueError(address);
-    }
-
-    return [
-        "" + ((address >> 24) & 0xff),
-        "" + ((address >> 16) & 0xff),
-        "" + ((address >> 8) & 0xff),
-        "" + (address & 0xff),
-    ].join(".");
-}
-
-
 export class IPv4Address {
+    private _octets: Uint8Array;
     private _ipNumber: number;
     private _ipString: string;
-    private _octets: number[];
 
     public constructor(address: string | number) {
         if (typeof address === "number") {
-            this._ipString = ipv4_number_to_string(address);
-            this._ipNumber = address;
+            if (address < 0 || address > IPV4_MAX_VALUE) {
+                throw new AddressValueError(address);
+            }
+
+            this._octets = new Uint8Array([
+                (address >> 24) & 0xff,
+                (address >> 16) & 0xff,
+                (address >> 8) & 0xff,
+                address & 0xff,
+            ]);
         } else if (typeof address === "string") {
-            this._ipNumber = ipv4_string_to_number(address);
-            this._ipString = address;
+            const addressSplitted = address.split(".");
+            if (addressSplitted.length !== 4) {
+                throw new AddressValueError(address);
+            }
+
+            this._octets = new Uint8Array(addressSplitted.map(
+                (octet) => {
+                    if (!Array.from(octet).every((ch) => DECIMAL_DIGITS.includes(ch))) {
+                        throw new AddressValueError(address);
+                    }
+
+                    const numberOctet = parseInt(octet, 10);
+                    if (numberOctet < 0 || numberOctet > 255) {
+                        throw new AddressValueError(address);
+                    }
+
+                    return numberOctet;
+                },
+            ));
         }
     }
 
     get ipNumber() {
+        if (typeof this._ipNumber === "undefined") {
+            this._ipNumber = this._octets.reduce(
+                (total, octet, index) => total + octet * (256 ** (this._octets.length - index - 1)),
+                0,
+            );
+        }
+
         return this._ipNumber;
     }
 
     get ipString() {
+        if (typeof this._ipString === "undefined") {
+            this._ipString = this._octets.join(".");
+        }
+
         return this._ipString;
     }
 
     get octets() {
-        if (typeof this._octets === "undefined") {
-            this._octets = this._ipString.split(".").map((octet) => parseInt(octet, 10));
-        }
-
         return this._octets;
     }
 
     public eq(other: IPv4Address) {
-        return this._ipNumber === other._ipNumber;
+        return this.ipNumber === other.ipNumber;
     }
 
     public ne(other: IPv4Address) {
-        return this._ipNumber !== other._ipNumber;
+        return this.ipNumber !== other.ipNumber;
     }
 
     public gt(other: IPv4Address) {
-        return this._ipNumber > other._ipNumber;
+        return this.ipNumber > other.ipNumber;
     }
 
     public lt(other: IPv4Address) {
-        return this._ipNumber < other._ipNumber;
+        return this.ipNumber < other.ipNumber;
     }
 
     public ge(other: IPv4Address) {
-        return this._ipNumber >= other._ipNumber;
+        return this.ipNumber >= other.ipNumber;
     }
 
     public le(other: IPv4Address) {
-        return this._ipNumber <= other._ipNumber;
+        return this.ipNumber <= other.ipNumber;
     }
 
     public add(amount: number) {
-        return new IPv4Address(this._ipNumber + amount);
+        return new IPv4Address(this.ipNumber + amount);
     }
 
     public substract(amount: number) {
-        return new IPv4Address(this._ipNumber - amount);
+        return new IPv4Address(this.ipNumber - amount);
     }
 
     public toString() {
-        return this._ipString;
+        return this.ipString;
     }
 
     public valueOf() {
-        return this._ipNumber;
+        return this.ipNumber;
     }
 }
 
@@ -185,7 +177,7 @@ export class IPv4Network {
 
     get prefix() {
         if (typeof this._prefix === "undefined") {
-            this._prefix = this._netmask.octets.reduce(
+            this._prefix = this.netmask.octets.reduce(
                 (prefix, octet) => prefix + NETMASK_OCTETS.indexOf(octet),
                 0,
             );
@@ -196,7 +188,7 @@ export class IPv4Network {
 
     get hostmask() {
         if (typeof this._hostmask === "undefined") {
-            this._hostmask = new IPv4Address(this._netmask.octets.map((octet) => ~octet & 0xff).join("."));
+            this._hostmask = new IPv4Address(this.netmask.octets.map((octet) => ~octet & 0xff).join("."));
         }
 
         return this._hostmask;
@@ -205,10 +197,10 @@ export class IPv4Network {
     get broadcast() {
         if (typeof this._broadcast === "undefined") {
             this._broadcast = new IPv4Address([
-                this._address.octets[0] | this.hostmask.octets[0],
-                this._address.octets[1] | this.hostmask.octets[1],
-                this._address.octets[2] | this.hostmask.octets[2],
-                this._address.octets[3] | this.hostmask.octets[3],
+                this.address.octets[0] | this.hostmask.octets[0],
+                this.address.octets[1] | this.hostmask.octets[1],
+                this.address.octets[2] | this.hostmask.octets[2],
+                this.address.octets[3] | this.hostmask.octets[3],
             ].join("."));
         }
 
@@ -221,7 +213,7 @@ export class IPv4Network {
 
     public * hosts(start?: IPv4Address) {
         if (!start) {
-            start = this._address;
+            start = this.address;
         }
 
         let address = start;
@@ -232,6 +224,6 @@ export class IPv4Network {
     }
 
     public contains(other: IPv4Address) {
-        return (this.broadcast.ge(other) && this._address.le(other));
+        return (this.broadcast.ge(other) && this.address.le(other));
     }
 }
