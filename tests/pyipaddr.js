@@ -86,6 +86,27 @@ function assertNetworkCheck(net, data) {
     assert.equal(net.broadcast.ipString, data.stringBroadcast);
     assert.equal(net.broadcast.ipNumber, data.numberBroadcast);
     assert.equal(net.numAddresses, data.numAddresses);
+    assert.equal(net.hosts().next().value.ipString, new IPv4(data.numberAddress).add(1).ipString);
+    assert(
+        net.hosts(new IPv4(data.numberBroadcast).substract(1)).next().done,
+        "Last IP check failed: " + new IPv4(data.numberBroadcast).substract(1).ipString,
+    );
+    assert(
+        net.contains(new IPv4(data.numberAddress).add(1)),
+        "First IP contains failed: " + new IPv4(data.numberAddress).add(1).ipString,
+    );
+    assert(
+        net.contains(new IPv4(data.numberBroadcast).substract(1)),
+        "Last IP contains failed: " + new IPv4(data.numberBroadcast).substract(1).ipString,
+    );
+    assert(
+        !net.contains(new IPv4(data.numberAddress).substract(1)),
+        "Before first IP contains failed: " + new IPv4(data.numberAddress).substract(1).ipString,
+    );
+    assert(
+        !net.contains(new IPv4(data.numberBroadcast).add(1)),
+        "After last IP contains failed: " + new IPv4(data.numberBroadcast).add(1).ipString,
+    );
 }
 
 

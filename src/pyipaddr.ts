@@ -218,4 +218,20 @@ export class IPv4Network {
     get numAddresses() {
         return this.hostmask.ipNumber + 1;
     }
+
+    public * hosts(start?: IPv4Address) {
+        if (!start) {
+            start = this._address;
+        }
+
+        let address = start;
+        while (address.ipNumber < this.broadcast.ipNumber - 1) {
+            address = new IPv4Address(address.ipNumber + 1);
+            yield address;
+        }
+    }
+
+    public contains(other: IPv4Address) {
+        return (this.broadcast.ge(other) && this._address.le(other));
+    }
 }
