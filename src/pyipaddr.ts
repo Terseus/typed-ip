@@ -117,7 +117,7 @@ export class AddressBuffer extends Uint8Array {
             const thisIndex = this.length - index - 1;
             const sum = this[thisIndex] + other[otherIndex] + carry;
             if (sum > 255) {
-                copy[thisIndex] = 256 - sum;
+                copy[thisIndex] = sum - 256;
                 carry = 1;
             } else {
                 copy[thisIndex] = sum;
@@ -147,7 +147,7 @@ export class AddressBuffer extends Uint8Array {
             const thisIndex = this.length - index - 1;
             const subs = this[thisIndex] - other[otherIndex] - carry;
             if (subs < 0) {
-                copy[thisIndex] = 256 + subs;
+                copy[thisIndex] = subs + 256;
                 carry = 1;
             } else {
                 copy[thisIndex] = subs;
