@@ -2,7 +2,7 @@
     "name": "pyipaddr",
     "version": "0.0.1",
     "scripts": {
-        "lint": "tslint",
+        "lint": "tslint -c tslint.json -p tsconfig.json --type-check",
         "test": "tsc && mocha tests/*.js",
         "build": "tsc && babel src/*.js -d lib"
     },
