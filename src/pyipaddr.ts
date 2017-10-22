@@ -30,18 +30,154 @@ export class NetmaskValueError extends Error {
 }
 
 
+const enum comparison {
+    Greater, Lesser, Equal,
+}
+
+
+type comparator = (left: number, right: number) => comparison;
+
+
+function compareBuffers(
+    left: AddressBuffer,
+    right: AddressBuffer,
+    func: comparator,
+): comparison {
+    if (left.length > right.length) {
+        return comparison.Greater;
+    }
+
+    if (right.length > left.length) {
+        return comparison.Lesser;
+    }
+
+    for (let index = 0; index < left.length; index++) {
+        const result = func(left[index], right[index]);
+        if (result !== comparison.Equal) {
+            return result;
+        }
+    }
+
+    return comparison.Equal;
+}
+
+
+function compareNumbers(left: number, right: number) {
+    if (left > right) {
+        return comparison.Greater;
+    }
+
+    if (right > left) {
+        return comparison.Lesser;
+    }
+
+    return comparison.Equal;
+}
+
+
+export class AddressBuffer extends Uint8Array {
+    public eq(other: AddressBuffer) {
+        return compareBuffers(this, other, compareNumbers) === comparison.Equal;
+    }
+
+    public ne(other: AddressBuffer) {
+        return compareBuffers(this, other, compareNumbers) !== comparison.Equal;
+    }
+
+    public gt(other: AddressBuffer) {
+        return compareBuffers(this, other, compareNumbers) === comparison.Greater;
+    }
+
+    public lt(other: AddressBuffer) {
+        return compareBuffers(this, other, compareNumbers) === comparison.Lesser;
+    }
+
+    public ge(other: AddressBuffer) {
+        const result = compareBuffers(this, other, compareNumbers);
+        return result === comparison.Greater || result === comparison.Equal;
+    }
+
+    public le(other: AddressBuffer) {
+        const result = compareBuffers(this, other, compareNumbers);
+        return result === comparison.Lesser || result === comparison.Equal;
+    }
+
+    public add(other: AddressBuffer) {
+        if (other.length > this.length) {
+            throw new Error("Unsupported operation: other cannot have more elements than this");
+        }
+        const copy = new AddressBuffer(this);
+        let carry = 0;
+        for (let index = 0; index < other.length; index++) {
+            const otherIndex = other.length - index - 1;
+            if (other[otherIndex] + carry === 0) {
+                continue;
+            }
+
+            const thisIndex = this.length - index - 1;
+            const sum = this[thisIndex] + other[otherIndex] + carry;
+            if (sum > 255) {
+                copy[thisIndex] = 256 - sum;
+                carry = 1;
+            } else {
+                copy[thisIndex] = sum;
+                carry = 0;
+            }
+        }
+
+        if (carry > 0) {
+            throw new Error("Overflow");
+        }
+
+        return copy;
+    }
+
+    public substract(other: AddressBuffer) {
+        if (other.length > this.length) {
+            throw new Error("Unsupported operation: other cannot have more elements than this");
+        }
+        const copy = new AddressBuffer(this);
+        let carry = 0;
+        for (let index = 0; index < other.length; index++) {
+            const otherIndex = other.length - index - 1;
+            if (other[otherIndex] + carry === 0) {
+                continue;
+            }
+
+            const thisIndex = this.length - index - 1;
+            const subs = this[thisIndex] - other[otherIndex] - carry;
+            if (subs < 0) {
+                copy[thisIndex] = 256 + subs;
+                carry = 1;
+            } else {
+                copy[thisIndex] = subs;
+                carry = 0;
+            }
+        }
+
+        if (carry > 0) {
+            throw new Error("Underflow");
+        }
+
+        return copy;
+    }
+}
+
+
 export class IPv4Address {
-    private _octets: Uint8Array;
+    private _octets: AddressBuffer;
     private _ipNumber: number;
     private _ipString: string;
 
-    public constructor(address: string | number) {
-        if (typeof address === "number") {
+    public constructor(address: string | number | AddressBuffer) {
+        if (address instanceof AddressBuffer) {
+            this._octets = new AddressBuffer(address);
+        } else if (typeof address === "number") {
             if (address < 0 || address > IPV4_MAX_VALUE) {
                 throw new AddressValueError(address);
             }
 
-            this._octets = new Uint8Array([
+            this._octets = new AddressBuffer([
                 (address >> 24) & 0xff,
                 (address >> 16) & 0xff,
                 (address >> 8) & 0xff,
@@ -53,7 +189,7 @@ export class IPv4Address {
                 throw new AddressValueError(address);
             }
 
-            this._octets = new Uint8Array(addressSplitted.map(
+            this._octets = new AddressBuffer(addressSplitted.map(
                 (octet) => {
                     if (!Array.from(octet).every((ch) => DECIMAL_DIGITS.includes(ch))) {
                         throw new AddressValueError(address);
@@ -94,35 +230,45 @@ export class IPv4Address {
     }
 
     public eq(other: IPv4Address) {
-        return this.ipNumber === other.ipNumber;
+        return this.octets.eq(other.octets);
     }
 
     public ne(other: IPv4Address) {
-        return this.ipNumber !== other.ipNumber;
+        return this.octets.ne(other.octets);
     }
 
     public gt(other: IPv4Address) {
-        return this.ipNumber > other.ipNumber;
+        return this.octets.gt(other.octets);
     }
 
     public lt(other: IPv4Address) {
-        return this.ipNumber < other.ipNumber;
+        return this.octets.lt(other.octets);
     }
 
     public ge(other: IPv4Address) {
-        return this.ipNumber >= other.ipNumber;
+        return this.octets.ge(other.octets);
     }
 
     public le(other: IPv4Address) {
-        return this.ipNumber <= other.ipNumber;
+        return this.octets.le(other.octets);
     }
 
     public add(amount: number) {
-        return new IPv4Address(this.ipNumber + amount);
+        return new IPv4Address(this.octets.add(new AddressBuffer([
+            (amount >> 24) & 0xff,
+            (amount >> 16) & 0xff,
+            (amount >> 8) & 0xff,
+            amount & 0xff,
+        ])));
     }
 
     public substract(amount: number) {
-        return new IPv4Address(this.ipNumber - amount);
+        return new IPv4Address(this.octets.substract(new AddressBuffer([
+            (amount >> 24) & 0xff,
+            (amount >> 16) & 0xff,
+            (amount >> 8) & 0xff,
+            amount & 0xff,
+        ])));
     }
 
     public toString() {
