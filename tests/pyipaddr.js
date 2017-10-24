@@ -5,45 +5,45 @@ const Netv4 = ipaddr.IPv4Network;
 
 
 const IPV4_VALID = {
-    '127.0.0.1': 2130706433,
-    '192.168.0.1': 3232235521,
-    '0.0.0.0': 0,
-    '255.255.255.255': ipaddr.IPV4_MAX_VALUE,
+    '127.0.0.1': [127, 0, 0, 1],
+    '192.168.0.1': [192, 168, 0, 1],
+    '0.0.0.0': [0, 0, 0, 0],
+    '255.255.255.255': [255, 255, 255, 255],
 };
 
 const IPV4_NETWORKS_VALID = (function () {
     return [{
         stringAddress: '192.168.0.0',
-        numberAddress: 3232235520,
+        octetsAddress: [192, 168, 0, 0],
         prefix: 24,
         stringNetmask: '255.255.255.0',
-        numberNetmask: 4294967040,
+        octetsNetmask: [255, 255, 255, 0],
         stringHostmask: '0.0.0.255',
-        numberHostmask: 255,
+        octetsHostmask: [0, 0, 0, 255],
         stringBroadcast: '192.168.0.255',
-        numberBroadcast: 3232235775,
+        octetsBroadcast: [192, 168, 0, 255],
         numAddresses: 256,
     }, {
         stringAddress: '10.0.0.0',
-        numberAddress: 167772160,
+        octetsAddress: [10, 0, 0, 0],
         prefix: 8,
         stringNetmask: '255.0.0.0',
-        numberNetmask: 4278190080,
+        octetsNetmask: [255, 0, 0, 0],
         stringHostmask: '0.255.255.255',
-        numberHostmask: 16777215,
+        octetsHostmask: [0, 255, 255, 255],
         stringBroadcast: '10.255.255.255',
-        numberBroadcast: 184549375,
+        octetsBroadcast: [10, 255, 255, 255],
         numAddresses: 16777216,
     }, {
         stringAddress: '148.56.0.0',
-        numberAddress: 2486697984,
+        octetsAddress: [148, 56, 0, 0],
         prefix: 20,
         stringNetmask: '255.255.240.0',
-        numberNetmask: 4294963200,
+        octetsNetmask: [255, 255, 240, 0],
         stringHostmask: '0.0.15.255',
-        numberHostmask: 4095,
+        octetsHostmask: [0, 0, 15, 255],
         stringBroadcast: '148.56.15.255',
-        numberBroadcast: 2486702079,
+        octetsBroadcast: [148, 56, 15, 255],
         numAddresses: 4096,
     }].map((network) => {
         network.inputPrefix = `${network.stringAddress}/${network.prefix}`;
@@ -77,35 +77,35 @@ function assertArrayEquals(original, expected, message) {
 
 function assertNetworkCheck(net, data) {
     assert.equal(net.address.ipString, data.stringAddress);
-    assert.equal(net.address.ipNumber, data.numberAddress);
+    assert.deepEqual(net.address.octets, data.octetsAddress);
     assert.equal(net.netmask.ipString, data.stringNetmask);
-    assert.equal(net.netmask.ipNumber, data.numberNetmask);
+    assert.deepEqual(net.netmask.octets, data.octetsNetmask);
     assert.equal(net.prefix, data.prefix);
     assert.equal(net.hostmask.ipString, data.stringHostmask);
-    assert.equal(net.hostmask.ipNumber, data.numberHostmask);
+    assert.deepEqual(net.hostmask.octets, data.octetsHostmask);
     assert.equal(net.broadcast.ipString, data.stringBroadcast);
-    assert.equal(net.broadcast.ipNumber, data.numberBroadcast);
+    assert.deepEqual(net.broadcast.octets, data.octetsBroadcast);
     assert.equal(net.numAddresses, data.numAddresses);
-    assert.equal(net.hosts().next().value.ipString, new IPv4(data.numberAddress).add(1).ipString);
+    assert.equal(net.hosts().next().value.ipString, new IPv4(data.octetsAddress).add([1]).ipString);
     assert(
-        net.hosts(new IPv4(data.numberBroadcast).substract(1)).next().done,
-        "Last IP check failed: " + new IPv4(data.numberBroadcast).substract(1).ipString,
+        net.hosts(new IPv4(data.octetsBroadcast).substract([1])).next().done,
+        "Last IP check failed: " + new IPv4(data.octetsBroadcast).substract([1]).ipString,
     );
     assert(
-        net.contains(new IPv4(data.numberAddress).add(1)),
-        "First IP contains failed: " + new IPv4(data.numberAddress).add(1).ipString,
+        net.contains(new IPv4(data.octetsAddress).add([1])),
+        "First IP contains failed: " + new IPv4(data.octetsAddress).add([1]).ipString,
     );
     assert(
-        net.contains(new IPv4(data.numberBroadcast).substract(1)),
-        "Last IP contains failed: " + new IPv4(data.numberBroadcast).substract(1).ipString,
+        net.contains(new IPv4(data.octetsBroadcast).substract([1])),
+        "Last IP contains failed: " + new IPv4(data.octetsBroadcast).substract([1]).ipString,
     );
     assert(
-        !net.contains(new IPv4(data.numberAddress).substract(1)),
-        "Before first IP contains failed: " + new IPv4(data.numberAddress).substract(1).ipString,
+        !net.contains(new IPv4(data.octetsAddress).substract([1])),
+        "Before first IP contains failed: " + new IPv4(data.octetsAddress).substract([1]).ipString,
     );
     assert(
-        !net.contains(new IPv4(data.numberBroadcast).add(1)),
-        "After last IP contains failed: " + new IPv4(data.numberBroadcast).add(1).ipString,
+        !net.contains(new IPv4(data.octetsBroadcast).add([1])),
+        "After last IP contains failed: " + new IPv4(data.octetsBroadcast).add([1]).ipString,
     );
 }
 
@@ -115,7 +115,7 @@ describe("IPv4Address", function () {
         it('should accept valid strings values', function () {
             for (let ipString in IPV4_VALID) {
                 let ip = new IPv4(ipString);
-                assert.equal(ip.ipNumber, IPV4_VALID[ipString]);
+                assert.deepEqual(ip.octets, IPV4_VALID[ipString]);
                 assert.equal(ip.ipString, ipString);
             }
         });
@@ -127,27 +127,27 @@ describe("IPv4Address", function () {
             assert.throws(() => new IPv4('192.a.0.1'), ipaddr.AddressValueError);
         });
     });
-    describe("constructor from number", function () {
-        it('should accept valid number values', function () {
+    describe("constructor from octets", function () {
+        it('should accept valid octets values', function () {
             for (let ipString in IPV4_VALID) {
                 let ip = new IPv4(ipString);
                 assert.equal(ip.ipString, ipString);
-                assert.equal(ip.ipNumber, IPV4_VALID[ipString]);
+                assert.deepEqual(ip.octets, IPV4_VALID[ipString]);
             }
         });
-        it('should reject invalid number values', function () {
-            assert.throws(() => new IPv4(-1), ipaddr.AddressValueError);
-            assert.throws(() => new IPv4(ipaddr.IPV4_MAX_VALUE + 1), ipaddr.AddressValueError);
+        it('should reject invalid octets values', function () {
+            assert.throws(() => new IPv4([-1]), ipaddr.AddressValueError);
+            assert.throws(() => new IPv4([256, 0, 0, 0]), ipaddr.AddressValueError);
         });
     });
     describe("arithmetic", function () {
         it('should add', function () {
-            assert(new IPv4('127.0.0.1').add(2).eq(new IPv4('127.0.0.3')));
-            assert(!new IPv4('127.0.0.1').add(1).eq(new IPv4('127.0.0.3')));
+            assert(new IPv4('127.0.0.1').add([2]).eq(new IPv4('127.0.0.3')));
+            assert(!new IPv4('127.0.0.1').add([1]).eq(new IPv4('127.0.0.3')));
         });
         it('should substract', function () {
-            assert(new IPv4('127.0.0.1').substract(2).eq(new IPv4('126.255.255.255')));
-            assert(!new IPv4('127.0.0.1').substract(1).eq(new IPv4('126.255.255.255')));
+            assert(new IPv4('127.0.0.1').substract([2]).eq(new IPv4('126.255.255.255')));
+            assert(!new IPv4('127.0.0.1').substract([1]).eq(new IPv4('126.255.255.255')));
         });
     });
     describe("comparisons", function () {
