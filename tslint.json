@@ -13,7 +13,9 @@
             "ban-keywords",
             "check-format",
             "allow-leading-underscore"
-        ]
+        ],
+        "forin": false,
+        "interface-name": false
     },
     "rulesDirectory": []
 }
