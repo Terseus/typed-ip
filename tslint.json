@@ -15,7 +15,8 @@
             "allow-leading-underscore"
         ],
         "forin": false,
-        "interface-name": false
+        "interface-name": false,
+        "only-arrow-functions": false
     },
     "rulesDirectory": []
 }
