@@ -1,14 +1,21 @@
 {
     "compilerOptions": {
         "strict": true,
-        "target": "ES2016",
-        "module": "commonjs"
+        "target": "es6",
+        "module": "commonjs",
+        "declaration": true,
+        "sourceMap": true,
+        "types": [
+            "node",
+            "mocha"
+        ],
+        "lib": [
+            "es2016",
+            "dom"
+        ]
     },
     "typeRoots": [
         "node_modules/@types"
-    ],
-    "types": [
-        "node"
     ],
     "include": [
         "src/**/*",

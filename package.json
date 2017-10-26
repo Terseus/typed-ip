@@ -3,8 +3,9 @@
     "version": "0.0.1",
     "scripts": {
         "lint": "tslint -c tslint.json -p tsconfig.json --type-check",
-        "test": "tsc && mocha tests/*.js",
-        "build": "tsc && babel src/*.js -d lib"
+        "test": "yarn run build && mocha dist/tests/*.js",
+        "build": "yarn run clean && tsc --outDir dist/",
+        "clean": "rm -rf dist/"
     },
     "devDependencies": {
         "@types/mocha": "^2.2.43",
