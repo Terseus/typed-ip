@@ -1,5 +1,9 @@
 import * as assert from "assert";
-import * as ipaddr from "../src/pyipaddr";
+import {
+    AddressValueError,
+    IPv4Address as ipv4,
+    IPv4Network as netv4,
+} from "../src/pyipaddr";
 
 
 interface AddressInfo {
@@ -20,10 +24,6 @@ interface NetworkInfo {
     inputPrefix?: string;
     inputAddress?: string;
 }
-
-
-const ipv4 = ipaddr.IPv4Address;
-const netv4 = ipaddr.IPv4Network;
 
 
 const IPV4_VALID: AddressInfo = {
@@ -98,7 +98,7 @@ function assertArrayEquals<T>(original: T[], expected: T[], message?: string) {
 }
 
 
-function assertNetworkCheck(net: ipaddr.IPv4Network, data: NetworkInfo) {
+function assertNetworkCheck(net: netv4, data: NetworkInfo) {
     assert.equal(net.address.ipString, data.stringAddress);
     assert.deepEqual(net.address.octets, data.octetsAddress);
     assert.equal(net.netmask.ipString, data.stringNetmask);
@@ -143,11 +143,11 @@ describe("IPv4Address", function() {
             }
         });
         it("should reject invalid string values", function() {
-            assert.throws(() => new ipv4("256.0.0.0"), ipaddr.AddressValueError);
-            assert.throws(() => new ipv4("192.0.-1.0"), ipaddr.AddressValueError);
-            assert.throws(() => new ipv4("192.168.0"), ipaddr.AddressValueError);
-            assert.throws(() => new ipv4("192.168.0.1.0"), ipaddr.AddressValueError);
-            assert.throws(() => new ipv4("192.a.0.1"), ipaddr.AddressValueError);
+            assert.throws(() => new ipv4("256.0.0.0"), AddressValueError);
+            assert.throws(() => new ipv4("192.0.-1.0"), AddressValueError);
+            assert.throws(() => new ipv4("192.168.0"), AddressValueError);
+            assert.throws(() => new ipv4("192.168.0.1.0"), AddressValueError);
+            assert.throws(() => new ipv4("192.a.0.1"), AddressValueError);
         });
     });
     describe("constructor from octets", function() {
@@ -159,8 +159,8 @@ describe("IPv4Address", function() {
             }
         });
         it("should reject invalid octets values", function() {
-            assert.throws(() => new ipv4([-1]), ipaddr.AddressValueError);
-            assert.throws(() => new ipv4([256, 0, 0, 0]), ipaddr.AddressValueError);
+            assert.throws(() => new ipv4([-1]), AddressValueError);
+            assert.throws(() => new ipv4([256, 0, 0, 0]), AddressValueError);
         });
     });
     describe("arithmetic", function() {
