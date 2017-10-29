@@ -16,19 +16,22 @@ export const IPV4_LENGTH = 32;
 export const IPV4_BYTES = 4;
 
 
-export type readonlyNumberArray = ReadonlyArray<number>;
-
-
 export class AddressValueError extends Error {
-    public constructor(address: string | readonlyNumberArray) {
+    public constructor(address: string | ReadonlyArray<number>) {
         super("Invalid address: " + address);
+        // Needed for Typescript 2.1 and following
+        // See https://github.com/Microsoft/TypeScript-wiki/blob/77a2a18a6e7bf8599bbe693243b1b9eb3044bfda/Breaking-Changes.md#extending-built-ins-like-error-array-and-map-may-no-longer-work
+        Object.setPrototypeOf(this, AddressValueError.prototype);
     }
 }
 
 
 export class NetmaskValueError extends Error {
-    public constructor(netmask: string | readonlyNumberArray) {
+    public constructor(netmask: string | ReadonlyArray<number>) {
         super("Invalid netmask: " + netmask);
+        // Needed for Typescript 2.1 and following
+        // See https://github.com/Microsoft/TypeScript-wiki/blob/77a2a18a6e7bf8599bbe693243b1b9eb3044bfda/Breaking-Changes.md#extending-built-ins-like-error-array-and-map-may-no-longer-work
+        Object.setPrototypeOf(this, NetmaskValueError.prototype);
     }
 }
 
@@ -38,13 +41,13 @@ const enum comparison {
 }
 
 
-type comparator = (left: number, right: number) => comparison;
+type comparator<T> = (left: T, right: T) => comparison;
 
 
-function compareBuffers(
-    left: AddressBuffer,
-    right: AddressBuffer,
-    func: comparator,
+function compareArrays<T>(
+    left: ArrayLike<T>,
+    right: ArrayLike<T>,
+    func: comparator<T>,
 ): comparison {
     if (left.length > right.length) {
         return comparison.Greater;
@@ -78,108 +81,86 @@ function compareNumbers(left: number, right: number) {
 }
 
 
-export class AddressBuffer extends Uint8Array {
-    public eq(other: AddressBuffer) {
-        return compareBuffers(this, other, compareNumbers) === comparison.Equal;
+function compareByteArrays(left: Uint8Array, right: Uint8Array) {
+    return compareArrays(left, right, compareNumbers);
+}
+
+
+function addByteArrays(left: Uint8Array, right: Uint8Array) {
+    if (right.length > left.length) {
+        throw new Error("Unsupported operation: right cannot have more elements than left");
     }
-
-    public ne(other: AddressBuffer) {
-        return compareBuffers(this, other, compareNumbers) !== comparison.Equal;
+    if (right.length < left.length) {
+        right = new Uint8Array(Array(left.length - right.length).fill(0x00).concat(right));
     }
-
-    public gt(other: AddressBuffer) {
-        return compareBuffers(this, other, compareNumbers) === comparison.Greater;
-    }
-
-    public lt(other: AddressBuffer) {
-        return compareBuffers(this, other, compareNumbers) === comparison.Lesser;
-    }
-
-    public ge(other: AddressBuffer) {
-        const result = compareBuffers(this, other, compareNumbers);
-        return result === comparison.Greater || result === comparison.Equal;
-    }
-
-    public le(other: AddressBuffer) {
-        const result = compareBuffers(this, other, compareNumbers);
-        return result === comparison.Lesser || result === comparison.Equal;
-    }
-
-    public add(other: AddressBuffer) {
-        if (other.length > this.length) {
-            throw new Error("Unsupported operation: other cannot have more elements than this");
-        }
-        if (other.length < this.length) {
-            other = new AddressBuffer(Array(this.length - other.length).fill(0x00).concat(other));
-        }
-        const copy = new AddressBuffer(this);
-        let carry = 0;
-        for (let index = 0; index < other.length; index++) {
-            const otherIndex = other.length - index - 1;
-            if (other[otherIndex] + carry === 0) {
-                continue;
-            }
-
-            const thisIndex = this.length - index - 1;
-            const sum = this[thisIndex] + other[otherIndex] + carry;
-            if (sum > 255) {
-                copy[thisIndex] = sum - 256;
-                carry = 1;
-            } else {
-                copy[thisIndex] = sum;
-                carry = 0;
-            }
+    const copy = new Uint8Array(left);
+    let carry = 0;
+    for (let index = 0; index < right.length; index++) {
+        const rightIndex = right.length - index - 1;
+        if (right[rightIndex] + carry === 0) {
+            continue;
         }
 
-        if (carry > 0) {
-            throw new Error("Overflow");
+        const leftIndex = left.length - index - 1;
+        const sum = left[leftIndex] + right[rightIndex] + carry;
+        if (sum > 255) {
+            copy[leftIndex] = sum - 256;
+            carry = 1;
+        } else {
+            copy[leftIndex] = sum;
+            carry = 0;
         }
-
-        return copy;
     }
 
-    public substract(other: AddressBuffer) {
-        if (other.length > this.length) {
-            throw new Error("Unsupported operation: other cannot have more elements than this");
-        }
-        if (other.length < this.length) {
-            other = new AddressBuffer(Array(this.length - other.length).fill(0x00).concat(other));
-        }
-        const copy = new AddressBuffer(this);
-        let carry = 0;
-        for (let index = 0; index < other.length; index++) {
-            const otherIndex = other.length - index - 1;
-            if (other[otherIndex] + carry === 0) {
-                continue;
-            }
-
-            const thisIndex = this.length - index - 1;
-            const subs = this[thisIndex] - other[otherIndex] - carry;
-            if (subs < 0) {
-                copy[thisIndex] = subs + 256;
-                carry = 1;
-            } else {
-                copy[thisIndex] = subs;
-                carry = 0;
-            }
-        }
-
-        if (carry > 0) {
-            throw new Error("Underflow");
-        }
-
-        return copy;
+    if (carry > 0) {
+        throw new Error("Overflow");
     }
+
+    return copy;
+}
+
+
+function substractByteArrays(left: Uint8Array, right: Uint8Array) {
+    if (right.length > left.length) {
+        throw new Error("Unsupported operation: right cannot have more elements than left");
+    }
+    if (right.length < left.length) {
+        right = new Uint8Array(Array(left.length - right.length).fill(0x00).concat(right));
+    }
+    const copy = new Uint8Array(left);
+    let carry = 0;
+    for (let index = 0; index < right.length; index++) {
+        const rightIndex = right.length - index - 1;
+        if (right[rightIndex] + carry === 0) {
+            continue;
+        }
+
+        const leftIndex = left.length - index - 1;
+        const subs = left[leftIndex] - right[rightIndex] - carry;
+        if (subs < 0) {
+            copy[leftIndex] = subs + 256;
+            carry = 1;
+        } else {
+            copy[leftIndex] = subs;
+            carry = 0;
+        }
+    }
+
+    if (carry > 0) {
+        throw new Error("Underflow");
+    }
+
+    return copy;
 }
 
 
 export class IPv4Address {
-    private _octets: AddressBuffer;
+    private _octets: Uint8Array;
     private _ipString: string;
 
-    public constructor(address: string | readonlyNumberArray | AddressBuffer) {
-        if (address instanceof AddressBuffer) {
-            this._octets = new AddressBuffer(address);
+    public constructor(address: string | ReadonlyArray<number> | Uint8Array) {
+        if (address instanceof Uint8Array) {
+            this._octets = new Uint8Array(address);
         } else if (address instanceof Array) {
             if (address.length > IPV4_BYTES) {
                 throw new AddressValueError(address);
@@ -190,14 +171,14 @@ export class IPv4Address {
             if (address.length < IPV4_BYTES) {
                 address = Array(IPV4_BYTES - address.length).fill(0x00).concat(address);
             }
-            this._octets = new AddressBuffer(address);
+            this._octets = new Uint8Array(address);
         } else if (typeof address === "string") {
             const addressSplitted = address.split(".");
             if (addressSplitted.length !== IPV4_BYTES) {
                 throw new AddressValueError(address);
             }
 
-            this._octets = new AddressBuffer(addressSplitted.map(
+            this._octets = new Uint8Array(addressSplitted.map(
                 (octet) => {
                     if (!Array.from(octet).every((ch) => DECIMAL_DIGITS.includes(ch))) {
                         throw new AddressValueError(address as string);
@@ -227,35 +208,37 @@ export class IPv4Address {
     }
 
     public eq(other: IPv4Address) {
-        return this.octets.eq(other.octets);
+        return compareByteArrays(this.octets, other.octets) === comparison.Equal;
     }
 
     public ne(other: IPv4Address) {
-        return this.octets.ne(other.octets);
+        return compareByteArrays(this.octets, other.octets) !== comparison.Equal;
     }
 
     public gt(other: IPv4Address) {
-        return this.octets.gt(other.octets);
+        return compareByteArrays(this.octets, other.octets) === comparison.Greater;
     }
 
     public lt(other: IPv4Address) {
-        return this.octets.lt(other.octets);
+        return compareByteArrays(this.octets, other.octets) === comparison.Lesser;
     }
 
     public ge(other: IPv4Address) {
-        return this.octets.ge(other.octets);
+        const result = compareByteArrays(this.octets, other.octets);
+        return result === comparison.Greater || result === comparison.Equal;
     }
 
     public le(other: IPv4Address) {
-        return this.octets.le(other.octets);
+        const result = compareByteArrays(this.octets, other.octets);
+        return result === comparison.Lesser || result === comparison.Equal;
     }
 
-    public add(amount: readonlyNumberArray) {
-        return new IPv4Address(this.octets.add(new AddressBuffer(amount)));
+    public add(amount: ReadonlyArray<number>) {
+        return new IPv4Address(addByteArrays(this.octets, new Uint8Array(amount)));
     }
 
-    public substract(amount: readonlyNumberArray) {
-        return new IPv4Address(this.octets.substract(new AddressBuffer(amount)));
+    public substract(amount: ReadonlyArray<number>) {
+        return new IPv4Address(substractByteArrays(this.octets, new Uint8Array(amount)));
     }
 
     public toString() {
