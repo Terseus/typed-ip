@@ -3,7 +3,7 @@ import {
     AddressValueError,
     IPv4Address as ipv4,
     IPv4Network as netv4,
-} from "../src/pyipaddr";
+} from "../src";
 
 
 interface AddressInfo {

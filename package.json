@@ -7,6 +7,8 @@
         "build": "yarn run clean && tsc --outDir dist/",
         "clean": "rm -rf dist/"
     },
+    "main": "./dist/src/index.js",
+    "types": "./dist/src/index.d.ts",
     "devDependencies": {
         "@types/mocha": "^2.2.43",
         "@types/node": "^8.0.47",
