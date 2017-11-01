@@ -1,13 +1,19 @@
 import {
-    NETMASK_OCTETS,
-} from './constants';
-
-import {
     comparison,
     compareNumberArrays,
     addNumberArrays,
     substractNumberArrays,
 } from './arrays';
+
+import {
+    AddressValueError,
+} from './exceptions';
+
+import {
+    DECIMAL_DIGITS,
+    IPV4_BYTES,
+} from './constants';
+
 
 export abstract class Address {
     private _octets: Uint8Array;
@@ -82,81 +88,48 @@ export abstract class Address {
 }
 
 
-export abstract class Network<AddressType extends Address> {
-    private addressConstructor: {new(input: Uint8Array): AddressType};
-    private _address: AddressType;
-    private _netmask: AddressType
-    private _prefix: number;
-    private _hostmask: AddressType;
-    private _broadcast: AddressType;
-    private _numAddresses: number;
-
-    public constructor (address: AddressType, netmask: AddressType, addressConstructor: {new(input: Uint8Array): AddressType}) {
-        this.addressConstructor = addressConstructor;
-        this._address = address;
-        this._netmask = netmask;
+export class Address4 extends Address {
+    private isValidOctet(octet: number) {
+        return octet >= 0 && octet <= 255;
     }
 
-    get address() {
-        return this._address;
+    protected getStringFromOctets(octets: Uint8Array) {
+        return octets.join(".");
     }
 
-    get netmask() {
-        return this._netmask;
-    }
-
-    get prefix() {
-        if (typeof this._prefix === "undefined") {
-            this._prefix = this.netmask.octets.reduce(
-                (prefix, octet) => prefix + NETMASK_OCTETS.indexOf(octet),
-                0,
-            );
+    protected getOctetsFromArray(address: ReadonlyArray<number>) {
+        if (address.length > IPV4_BYTES) {
+            throw new AddressValueError(address);
         }
-        return this._prefix;
-    }
-
-    get hostmask() {
-        if (typeof this._hostmask === "undefined") {
-            this._hostmask = new this.addressConstructor(this.netmask.octets.map((octet) => ~octet & 0xff));
+        if (!address.every((octet) => this.isValidOctet(octet))) {
+            throw new AddressValueError(address);
         }
-        return this._hostmask;
-    }
-
-    get broadcast() {
-        if (typeof this._broadcast === "undefined") {
-            this._broadcast = new this.addressConstructor(Uint8Array.from(
-                this.address.octets.keys()
-            ).map(
-                (key) => this.address.octets[key] | this.hostmask.octets[key]
-            ));
+        if (address.length < IPV4_BYTES) {
+            address = Array(IPV4_BYTES - address.length).fill(0x00).concat(address);
         }
-        return this._broadcast;
+        return new Uint8Array(address);
     }
 
-    get numAddresses() {
-        if (typeof this._numAddresses === "undefined") {
-            this._numAddresses = this.hostmask.octets.reduce(
-                (total, octet, index) => total + octet * (256 ** (this.hostmask.octets.length - index - 1)),
-                1,
-            );
-        }
-        return this._numAddresses;
-    }
-
-    public * hosts(start?: AddressType) {
-        if (typeof start === "undefined") {
-            start = this.address;
+    protected getOctetsFromString(address: string) {
+        const addressSplitted = address.split(".");
+        if (addressSplitted.length !== IPV4_BYTES) {
+            throw new AddressValueError(address);
         }
 
-        let address = start;
-        const maxAddress = this.broadcast.substract([1]);
-        while (address.lt(maxAddress)) {
-            address = address.add([1]);
-            yield address;
-        }
-    }
+        const octets = new Uint8Array(addressSplitted.map(
+            (octet) => {
+                if (!Array.from(octet).every((ch) => DECIMAL_DIGITS.includes(ch))) {
+                    throw new AddressValueError(address as string);
+                }
 
-    public contains(other: AddressType) {
-        return (this.broadcast.ge(other) && this.address.le(other));
+                const numberOctet = parseInt(octet, 10);
+                if (!this.isValidOctet(numberOctet)) {
+                    throw new AddressValueError(address as string);
+                }
+
+                return numberOctet;
+            },
+        ));
+        return octets;
     }
 }

@@ -1,12 +1,12 @@
 export {
     Address,
-    Network,
+    Address4,
 } from './address';
 
 export {
-    Address4,
+    Network,
     Network4,
-} from './address4';
+} from './network';
 
 export {
     AddressValueError,
