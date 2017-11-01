@@ -1,6 +1,8 @@
 import * as assert from "assert";
 import {
     AddressValueError,
+    Address,
+    Network,
     IPv4Address as ipv4,
     IPv4Network as netv4,
 } from "../src";
@@ -99,13 +101,18 @@ function assertArrayEquals<T>(original: T[], expected: T[], message?: string) {
 
 
 function assertNetworkCheck(net: netv4, data: NetworkInfo) {
+    assert(net instanceof Network);
+    assert(net.address instanceof ipv4);
     assert.equal(net.address.ipString, data.stringAddress);
     assert.deepEqual(net.address.octets, data.octetsAddress);
+    assert(net.netmask instanceof ipv4);
     assert.equal(net.netmask.ipString, data.stringNetmask);
     assert.deepEqual(net.netmask.octets, data.octetsNetmask);
     assert.equal(net.prefix, data.prefix);
+    assert(net.hostmask instanceof ipv4);
     assert.equal(net.hostmask.ipString, data.stringHostmask);
     assert.deepEqual(net.hostmask.octets, data.octetsHostmask);
+    assert(net.broadcast instanceof ipv4);
     assert.equal(net.broadcast.ipString, data.stringBroadcast);
     assert.deepEqual(net.broadcast.octets, data.octetsBroadcast);
     assert.equal(net.numAddresses, data.numAddresses);
@@ -153,7 +160,7 @@ describe("IPv4Address", function() {
     describe("constructor from octets", function() {
         it("should accept valid octets values", function() {
             for (const ipString in IPV4_VALID) {
-                const ip = new ipv4(ipString);
+                const ip = new ipv4(IPV4_VALID[ipString]);
                 assert.equal(ip.ipString, ipString);
                 assert.deepEqual(ip.octets, IPV4_VALID[ipString]);
             }
@@ -161,6 +168,9 @@ describe("IPv4Address", function() {
         it("should reject invalid octets values", function() {
             assert.throws(() => new ipv4([-1]), AddressValueError);
             assert.throws(() => new ipv4([256, 0, 0, 0]), AddressValueError);
+        });
+        it("should be subclass of Address", function () {
+            assert(new ipv4(IPV4_VALID[0]) instanceof Address);
         });
     });
     describe("arithmetic", function() {
