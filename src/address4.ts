@@ -16,7 +16,7 @@ import {
 
 
 
-export class IPv4Address extends Address {
+export class Address4 extends Address {
     private isValidOctet(octet: number) {
         return octet >= 0 && octet <= 255;
     }
@@ -63,7 +63,7 @@ export class IPv4Address extends Address {
 }
 
 
-export class IPv4Network extends Network<IPv4Address>{
+export class Network4 extends Network<Address4>{
     public constructor(input: string) {
         const [subaddress, subnetmask, nothing] = input.split("/");
         if (typeof nothing !== "undefined") {
@@ -74,7 +74,7 @@ export class IPv4Network extends Network<IPv4Address>{
             throw new AddressValueError(input);
         }
 
-        const address = new IPv4Address(subaddress);
+        const address = new Address4(subaddress);
         if (Array.from(subnetmask).every((ch) => DECIMAL_DIGITS.includes(ch))) {
             const prefix = parseInt(subnetmask, 10);
             if (prefix < 0 || prefix > IPV4_LENGTH) {
@@ -89,13 +89,13 @@ export class IPv4Network extends Network<IPv4Address>{
             if (partialByte > 0) {
                 bytes[IPV4_BYTES - fullBytes] = NETMASK_OCTETS[partialByte];
             }
-            var netmask = new IPv4Address(bytes);
+            var netmask = new Address4(bytes);
         } else {
-            var netmask = new IPv4Address(subnetmask);
+            var netmask = new Address4(subnetmask);
             if (!netmask.octets.every((octet) => NETMASK_OCTETS.includes(octet))) {
                 throw new AddressValueError(subnetmask);
             }
         }
-        super(address, netmask, IPv4Address);
+        super(address, netmask, Address4);
     }
 }

@@ -4,8 +4,8 @@ export {
 } from './address';
 
 export {
-    IPv4Address,
-    IPv4Network,
+    Address4,
+    Network4,
 } from './address4';
 
 export {
