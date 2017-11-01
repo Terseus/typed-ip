@@ -1,8 +1,9 @@
 import {
     comparison,
+    ByteArray,
     compareNumberArrays,
-    addNumberArrays,
-    substractNumberArrays,
+    addByteArrays,
+    substractByteArrays,
 } from './arrays';
 
 import {
@@ -16,12 +17,12 @@ import {
 
 
 export abstract class Address {
-    private _octets: Uint8Array;
+    private _octets: ByteArray;
     private _ipString: string;
 
     public constructor(input: string);
     public constructor(input: ReadonlyArray<number>);
-    public constructor(input: Uint8Array);
+    public constructor(input: ByteArray);
     public constructor(input: any) {
         if (input instanceof Uint8Array) {
             this._octets = input;
@@ -32,7 +33,7 @@ export abstract class Address {
         }
     }
 
-    protected abstract getStringFromOctets(octets: Uint8Array) : string;
+    protected abstract getStringFromOctets(octets: ByteArray) : string;
     protected abstract getOctetsFromArray(address: ReadonlyArray<number>) : Uint8Array;
     protected abstract getOctetsFromString(address: string) : Uint8Array;
 
@@ -53,37 +54,37 @@ export abstract class Address {
     }
 
     public eq(other: this) {
-        return compareNumberArrays(this.octets, other.octets) === comparison.Equal;
+        return compareNumberArrays(<any>this.octets, <any>other.octets) === comparison.Equal;
     }
 
     public ne(other: this) {
-        return compareNumberArrays(this.octets, other.octets) !== comparison.Equal;
+        return compareNumberArrays(<any>this.octets, <any>other.octets) !== comparison.Equal;
     }
 
     public gt(other: this) {
-        return compareNumberArrays(this.octets, other.octets) === comparison.Greater;
+        return compareNumberArrays(<any>this.octets, <any>other.octets) === comparison.Greater;
     }
 
     public lt(other: this) {
-        return compareNumberArrays(this.octets, other.octets) === comparison.Lesser;
+        return compareNumberArrays(<any>this.octets, <any>other.octets) === comparison.Lesser;
     }
 
     public ge(other: this) {
-        const result = compareNumberArrays(this.octets, other.octets);
+        const result = compareNumberArrays(<any>this.octets, <any>other.octets);
         return result === comparison.Greater || result === comparison.Equal;
     }
 
     public le(other: this) {
-        const result = compareNumberArrays(this.octets, other.octets);
+        const result = compareNumberArrays(<any>this.octets, <any>other.octets);
         return result === comparison.Lesser || result === comparison.Equal;
     }
 
-    public add(amount: ReadonlyArray<number>) {
-        return new (<any> this.constructor)(addNumberArrays(this.octets, new Uint8Array(amount)));
+    public add(amount: ReadonlyArray<number>): this {
+        return new (<any> this.constructor)(addByteArrays(<any>this.octets, amount));
     }
 
-    public substract(amount: ReadonlyArray<number>) {
-        return new (<any> this.constructor)(substractNumberArrays(this.octets, new Uint8Array(amount)));
+    public substract(amount: ReadonlyArray<number>): this {
+        return new (<any> this.constructor)(substractByteArrays(<any>this.octets, amount));
     }
 }
 
@@ -93,7 +94,7 @@ export class Address4 extends Address {
         return octet >= 0 && octet <= 255;
     }
 
-    protected getStringFromOctets(octets: Uint8Array) {
+    protected getStringFromOctets(octets: ByteArray) {
         return octets.join(".");
     }
 

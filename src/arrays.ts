@@ -1,15 +1,16 @@
+export interface ByteArray extends Uint8Array {
+    readonly [index: number]: number;
+}
+
+
 export const enum comparison {
     Greater, Lesser, Equal,
 }
 
 
-export type comparator<T> = (left: T, right: T) => comparison;
-
-
-export function compareArrays<T>(
-    left: ArrayLike<T>,
-    right: ArrayLike<T>,
-    func: comparator<T>,
+export function compareNumberArrays(
+    left: ReadonlyArray<number>,
+    right: ReadonlyArray<number>
 ): comparison {
     if (left.length > right.length) {
         return comparison.Greater;
@@ -20,9 +21,12 @@ export function compareArrays<T>(
     }
 
     for (let index = 0; index < left.length; index++) {
-        const result = func(left[index], right[index]);
-        if (result !== comparison.Equal) {
-            return result;
+        if (left[index] > right[index]) {
+            return comparison.Greater;
+        }
+
+        if (left[index] < right[index]) {
+            return comparison.Lesser;
         }
     }
 
@@ -30,32 +34,14 @@ export function compareArrays<T>(
 }
 
 
-export function compareNumbers(left: number, right: number) {
-    if (left > right) {
-        return comparison.Greater;
-    }
-
-    if (right > left) {
-        return comparison.Lesser;
-    }
-
-    return comparison.Equal;
-}
-
-
-export function compareNumberArrays(left: ArrayLike<number>, right: ArrayLike<number>) {
-    return compareArrays(left, right, compareNumbers);
-}
-
-
-export function addNumberArrays(left: ArrayLike<number>, right: ArrayLike<number>) {
+export function addByteArrays(left: ReadonlyArray<number>, right: ReadonlyArray<number>): ByteArray {
     if (right.length > left.length) {
         throw new Error("Unsupported operation: right cannot have more elements than left");
     }
     if (right.length < left.length) {
-        right = new (<any> right.constructor)(Array(left.length - right.length).fill(0x00).concat(right));
+        right = Array(left.length - right.length).fill(0x00).concat(right);
     }
-    const copy = new (<any> left.constructor)(left);
+    const copy = new Uint8Array(left);
     let carry = 0;
     for (let index = 0; index < right.length; index++) {
         const rightIndex = right.length - index - 1;
@@ -82,14 +68,14 @@ export function addNumberArrays(left: ArrayLike<number>, right: ArrayLike<number
 }
 
 
-export function substractNumberArrays(left: ArrayLike<number>, right: ArrayLike<number>) {
+export function substractByteArrays(left: ReadonlyArray<number>, right: ReadonlyArray<number>): ByteArray {
     if (right.length > left.length) {
         throw new Error("Unsupported operation: right cannot have more elements than left");
     }
     if (right.length < left.length) {
-        right = new (<any> right.constructor)(Array(left.length - right.length).fill(0x00).concat(right));
+        right = Array(left.length - right.length).fill(0x00).concat(right);
     }
-    const copy = new (<any> left.constructor)(left);
+    const copy = new Uint8Array(left);
     let carry = 0;
     for (let index = 0; index < right.length; index++) {
         const rightIndex = right.length - index - 1;

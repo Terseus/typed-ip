@@ -1,4 +1,8 @@
 import {
+    ByteArray,
+} from './arrays';
+
+import {
     Address,
     Address4,
 } from './address';
@@ -15,7 +19,7 @@ import {
 } from './constants';
 
 export abstract class Network<AddressType extends Address> {
-    private addressConstructor: {new(input: Uint8Array): AddressType};
+    private addressConstructor: {new(input: ByteArray): AddressType};
     private _address: AddressType;
     private _netmask: AddressType
     private _prefix: number;
@@ -23,7 +27,7 @@ export abstract class Network<AddressType extends Address> {
     private _broadcast: AddressType;
     private _numAddresses: number;
 
-    public constructor (address: AddressType, netmask: AddressType, addressConstructor: {new(input: Uint8Array): AddressType}) {
+    public constructor (address: AddressType, netmask: AddressType, addressConstructor: {new(input: ByteArray): AddressType}) {
         this.addressConstructor = addressConstructor;
         this._address = address;
         this._netmask = netmask;
@@ -49,7 +53,9 @@ export abstract class Network<AddressType extends Address> {
 
     get hostmask() {
         if (typeof this._hostmask === "undefined") {
-            this._hostmask = new this.addressConstructor(this.netmask.octets.map((octet) => ~octet & 0xff));
+            this._hostmask = new this.addressConstructor(
+                this.netmask.octets.map((octet) => ~octet & 0xff)
+            );
         }
         return this._hostmask;
     }
