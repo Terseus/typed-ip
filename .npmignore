@@ -1,5 +1,5 @@
 src/
-pyipaddr*.tgz
+*.tgz
 *.vim
 tsconfig.json
 tslint.json
@@ -7,3 +7,4 @@ tests/
 tags
 dist/tests/
 yarn.lock
+docs/
