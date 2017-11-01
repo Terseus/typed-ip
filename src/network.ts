@@ -18,6 +18,13 @@ import {
     NETMASK_OCTETS,
 } from "./constants";
 
+
+/**
+ * Base class for network implementations.
+ *
+ * This class is abstract and not meant to be used directly outside of the
+ * library except for type declarations and checks.
+ */
 export abstract class Network<AddressType extends Address> {
     private addressConstructor: {new(input: ByteArray): AddressType};
     private _address: AddressType;
@@ -37,14 +44,23 @@ export abstract class Network<AddressType extends Address> {
         this._netmask = netmask;
     }
 
+    /**
+     * The network address.
+     */
     get address(): AddressType {
         return this._address;
     }
 
+    /**
+     * The network mask.
+     */
     get netmask(): AddressType {
         return this._netmask;
     }
 
+    /**
+     * The network prefix.
+     */
     get prefix(): number {
         if (typeof this._prefix === "undefined") {
             this._prefix = this.netmask.octets.reduce(
@@ -55,6 +71,9 @@ export abstract class Network<AddressType extends Address> {
         return this._prefix;
     }
 
+    /**
+     * The network hostmask (the netmask inverted).
+     */
     get hostmask(): AddressType {
         if (typeof this._hostmask === "undefined") {
             this._hostmask = new this.addressConstructor(
@@ -64,6 +83,9 @@ export abstract class Network<AddressType extends Address> {
         return this._hostmask;
     }
 
+    /**
+     * The network broadcast address.
+     */
     get broadcast(): AddressType {
         if (typeof this._broadcast === "undefined") {
             this._broadcast = new this.addressConstructor(Uint8Array.from(
@@ -75,6 +97,14 @@ export abstract class Network<AddressType extends Address> {
         return this._broadcast;
     }
 
+    /**
+     * The number of addresses in this network.
+     *
+     * WARNING!
+     * Due to Javascript limitations (and because I don't want to depend on a
+     * bignum library) this function may returns inaccurate results if the
+     * network can hold more than 2^53 addresses.
+     */
     get numAddresses(): number {
         if (typeof this._numAddresses === "undefined") {
             this._numAddresses = this.hostmask.octets.reduce(
@@ -85,6 +115,13 @@ export abstract class Network<AddressType extends Address> {
         return this._numAddresses;
     }
 
+    /**
+     * Returns an iterator with all the addresses of the network starting from
+     * `start` address.
+     *
+     * If `start` address is not supplied, network `address` property will be
+     * used instead.
+     */
     public * hosts(start?: AddressType): IterableIterator<AddressType> {
         if (typeof start === "undefined") {
             start = this.address;
@@ -98,13 +135,27 @@ export abstract class Network<AddressType extends Address> {
         }
     }
 
+    /**
+     * Returns if the network holds the given address.
+     */
     public contains(other: AddressType): boolean {
         return (this.broadcast.ge(other) && this.address.le(other));
     }
 }
 
 
+/**
+ * An IPv4 network.
+ *
+ * The objects of this class are meant to be immutable.
+ */
 export class Network4 extends Network<Address4> {
+    /**
+     * Constructs a new network instance.
+     *
+     * The input can be a string representing the network address in the form
+     * of "address/prefix" or "address/netmask".
+     */
     public constructor(input: string) {
         const [subaddress, subnetmask, nothing] = input.split("/");
         if (typeof nothing !== "undefined") {

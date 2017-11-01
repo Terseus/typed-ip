@@ -6,7 +6,9 @@
         "test": "npm run build && mocha dist/tests/*.js",
         "build": "npm run clean && tsc --outDir dist/",
         "pack": "npm run build && npm pack",
-        "clean": "rm -rf dist/"
+        "clean": "rm -rf dist/",
+        "cleandoc": "rm -rf docs/",
+        "doc": "npm run cleandoc && typedoc src/"
     },
     "main": "./dist/src/index.js",
     "types": "./dist/src/index.d.ts",
@@ -21,6 +23,7 @@
         "babel-preset-env": "^1.5.1",
         "mocha": "^3.4.2",
         "tslint": "^5.4.3",
+        "typedoc": "^0.9.0",
         "typescript": "^2.3.4"
     }
 }

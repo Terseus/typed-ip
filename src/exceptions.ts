@@ -1,3 +1,7 @@
+/**
+ * Exception thrown when an invalid address is given to any function or
+ * constructor.
+ */
 export class AddressValueError extends Error {
     public constructor(address: string | ReadonlyArray<number>) {
         super("Invalid address: " + address);

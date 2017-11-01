@@ -24,5 +24,13 @@
     "exclude": [
         "node_modules",
         "**/*.spec.ts"
-    ]
+    ],
+    "typedocOptions": {
+        "target": "es5",
+        "mode": "file",
+        "out": "docs",
+        "excludeExternals": true,
+        "excludePrivate": true,
+        "excludeNotExported": true
+    }
 }

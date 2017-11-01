@@ -1,13 +1,25 @@
+/**
+ * A readonly `Uint8Array`.
+ *
+ * Used to have (and give) the guarantee that the passed in and out arrays
+ * will not be modified.
+ */
 export interface ByteArray extends Uint8Array {
     readonly [index: number]: number;
 }
 
 
+/**
+ * @hidden
+ */
 export const enum comparison {
     Greater, Lesser, Equal,
 }
 
 
+/**
+ * @hidden
+ */
 export function compareByteArrays(
     left: ByteArray,
     right: ByteArray,
@@ -34,6 +46,9 @@ export function compareByteArrays(
 }
 
 
+/**
+ * @hidden
+ */
 export function addByteArrays(
     left: ByteArray,
     right: ByteArray,
@@ -71,6 +86,9 @@ export function addByteArrays(
 }
 
 
+/**
+ * @hidden
+ */
 export function substractByteArrays(
     left: ByteArray,
     right: ByteArray,
