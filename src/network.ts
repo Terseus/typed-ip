@@ -37,15 +37,15 @@ export abstract class Network<AddressType extends Address> {
         this._netmask = netmask;
     }
 
-    get address() {
+    get address(): AddressType {
         return this._address;
     }
 
-    get netmask() {
+    get netmask(): AddressType {
         return this._netmask;
     }
 
-    get prefix() {
+    get prefix(): number {
         if (typeof this._prefix === "undefined") {
             this._prefix = this.netmask.octets.reduce(
                 (prefix, octet) => prefix + NETMASK_OCTETS.indexOf(octet),
@@ -55,7 +55,7 @@ export abstract class Network<AddressType extends Address> {
         return this._prefix;
     }
 
-    get hostmask() {
+    get hostmask(): AddressType {
         if (typeof this._hostmask === "undefined") {
             this._hostmask = new this.addressConstructor(
                 this.netmask.octets.map((octet) => ~octet & 0xff),
@@ -64,7 +64,7 @@ export abstract class Network<AddressType extends Address> {
         return this._hostmask;
     }
 
-    get broadcast() {
+    get broadcast(): AddressType {
         if (typeof this._broadcast === "undefined") {
             this._broadcast = new this.addressConstructor(Uint8Array.from(
                 this.address.octets.keys(),
@@ -75,7 +75,7 @@ export abstract class Network<AddressType extends Address> {
         return this._broadcast;
     }
 
-    get numAddresses() {
+    get numAddresses(): number {
         if (typeof this._numAddresses === "undefined") {
             this._numAddresses = this.hostmask.octets.reduce(
                 (total, octet, index) => total + octet * (256 ** (this.hostmask.octets.length - index - 1)),
@@ -85,7 +85,7 @@ export abstract class Network<AddressType extends Address> {
         return this._numAddresses;
     }
 
-    public * hosts(start?: AddressType) {
+    public * hosts(start?: AddressType): IterableIterator<AddressType> {
         if (typeof start === "undefined") {
             start = this.address;
         }
@@ -98,7 +98,7 @@ export abstract class Network<AddressType extends Address> {
         }
     }
 
-    public contains(other: AddressType) {
+    public contains(other: AddressType): boolean {
         return (this.broadcast.ge(other) && this.address.le(other));
     }
 }

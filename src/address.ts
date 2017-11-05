@@ -25,36 +25,36 @@ export abstract class Address {
 
     abstract get ipString(): string;
 
-    get octets() {
+    get octets(): ByteArray {
         return this._octets;
     }
 
-    public toString() {
+    public toString(): string {
         return this.ipString;
     }
 
-    public eq(other: this) {
+    public eq(other: this): boolean {
         return compareByteArrays(this.octets, other.octets) === comparison.Equal;
     }
 
-    public ne(other: this) {
+    public ne(other: this): boolean {
         return compareByteArrays(this.octets, other.octets) !== comparison.Equal;
     }
 
-    public gt(other: this) {
+    public gt(other: this): boolean {
         return compareByteArrays(this.octets, other.octets) === comparison.Greater;
     }
 
-    public lt(other: this) {
+    public lt(other: this): boolean {
         return compareByteArrays(this.octets , other.octets ) === comparison.Lesser;
     }
 
-    public ge(other: this) {
+    public ge(other: this): boolean {
         const result = compareByteArrays(this.octets , other.octets );
         return result === comparison.Greater || result === comparison.Equal;
     }
 
-    public le(other: this) {
+    public le(other: this): boolean {
         const result = compareByteArrays(this.octets , other.octets );
         return result === comparison.Lesser || result === comparison.Equal;
     }
@@ -117,7 +117,7 @@ export class Address4 extends Address {
         return this._ipString;
     }
 
-    private isValidOctet(octet: number) {
+    private isValidOctet(octet: number): boolean {
         return octet >= 0 && octet <= 255;
     }
 }
