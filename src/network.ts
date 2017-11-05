@@ -27,7 +27,7 @@ export abstract class Network<AddressType extends Address> {
     private _broadcast: AddressType;
     private _numAddresses: number;
 
-    public constructor (address: AddressType, netmask: AddressType, addressConstructor: {new(input: ByteArray): AddressType}) {
+    protected constructor (address: AddressType, netmask: AddressType, addressConstructor: {new(input: ByteArray): AddressType}) {
         this.addressConstructor = addressConstructor;
         this._address = address;
         this._netmask = netmask;

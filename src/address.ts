@@ -18,32 +18,12 @@ import {
 
 export abstract class Address {
     private _octets: ByteArray;
-    private _ipString: string;
 
-    public constructor(input: string);
-    public constructor(input: ReadonlyArray<number>);
-    public constructor(input: ByteArray);
-    public constructor(input: any) {
-        if (input instanceof Uint8Array) {
-            this._octets = input;
-        } else if (input instanceof Array) {
-            this._octets = this.getOctetsFromArray(input);
-        } else if (typeof input === "string") {
-            this._octets = this.getOctetsFromString(input);
-        }
+    public constructor(octets: ByteArray) {
+        this._octets = octets;
     }
 
-    protected abstract getStringFromOctets(octets: ByteArray) : string;
-    protected abstract getOctetsFromArray(address: ReadonlyArray<number>) : Uint8Array;
-    protected abstract getOctetsFromString(address: string) : Uint8Array;
-
-    get ipString() {
-        if (typeof this._ipString === "undefined") {
-            this._ipString = this.getStringFromOctets(this.octets);
-        }
-
-        return this._ipString;
-    }
+    abstract get ipString(): string;
 
     get octets() {
         return this._octets;
@@ -90,47 +70,57 @@ export abstract class Address {
 
 
 export class Address4 extends Address {
+    private _ipString: string;
+
+    public constructor(input: string);
+    public constructor(input: ReadonlyArray<number>);
+    public constructor(input: ByteArray);
+    public constructor(input: any) {
+        if (input instanceof Uint8Array) {
+            super(input);
+        } else if (input instanceof Array) {
+            if (input.length > IPV4_BYTES) {
+                throw new AddressValueError(input);
+            }
+            if (!input.every((octet) => this.isValidOctet(octet))) {
+                throw new AddressValueError(input);
+            }
+            if (input.length < IPV4_BYTES) {
+                input = Array(IPV4_BYTES - input.length).fill(0x00).concat(input);
+            }
+            super(new Uint8Array(input));
+        } else if (typeof input === "string") {
+            const addressSplitted = input.split(".");
+            if (addressSplitted.length !== IPV4_BYTES) {
+                throw new AddressValueError(input);
+            }
+
+            const octets = new Uint8Array(addressSplitted.map(
+                (octet) => {
+                    if (!Array.from(octet).every((ch) => DECIMAL_DIGITS.includes(ch))) {
+                        throw new AddressValueError(input as string);
+                    }
+
+                    const numberOctet = parseInt(octet, 10);
+                    if (!this.isValidOctet(numberOctet)) {
+                        throw new AddressValueError(input as string);
+                    }
+
+                    return numberOctet;
+                },
+            ));
+            super(octets);
+        }
+    }
+
+    public get ipString() {
+        if (typeof this._ipString === "undefined") {
+            this._ipString = this.octets.join(".");
+        }
+        return this._ipString;
+    }
+
     private isValidOctet(octet: number) {
         return octet >= 0 && octet <= 255;
-    }
-
-    protected getStringFromOctets(octets: ByteArray) {
-        return octets.join(".");
-    }
-
-    protected getOctetsFromArray(address: ReadonlyArray<number>) {
-        if (address.length > IPV4_BYTES) {
-            throw new AddressValueError(address);
-        }
-        if (!address.every((octet) => this.isValidOctet(octet))) {
-            throw new AddressValueError(address);
-        }
-        if (address.length < IPV4_BYTES) {
-            address = Array(IPV4_BYTES - address.length).fill(0x00).concat(address);
-        }
-        return new Uint8Array(address);
-    }
-
-    protected getOctetsFromString(address: string) {
-        const addressSplitted = address.split(".");
-        if (addressSplitted.length !== IPV4_BYTES) {
-            throw new AddressValueError(address);
-        }
-
-        const octets = new Uint8Array(addressSplitted.map(
-            (octet) => {
-                if (!Array.from(octet).every((ch) => DECIMAL_DIGITS.includes(ch))) {
-                    throw new AddressValueError(address as string);
-                }
-
-                const numberOctet = parseInt(octet, 10);
-                if (!this.isValidOctet(numberOctet)) {
-                    throw new AddressValueError(address as string);
-                }
-
-                return numberOctet;
-            },
-        ));
-        return octets;
     }
 }
