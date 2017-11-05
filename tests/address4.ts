@@ -55,12 +55,12 @@ describe("Address4", function() {
     });
     describe("arithmetic", function() {
         it("should add", function() {
-            assert(new Address4("127.0.0.1").add([2]).eq(new Address4("127.0.0.3")));
-            assert(!new Address4("127.0.0.1").add([1]).eq(new Address4("127.0.0.3")));
+            assert.deepEqual(new Address4("127.0.0.1").add([2]).getOctets(), [127, 0, 0, 3]);
+            assert.notDeepEqual(new Address4("127.0.0.1").add([1]).getOctets(), [127, 0, 0, 3]);
         });
         it("should substract", function() {
-            assert(new Address4("127.0.0.1").substract([2]).eq(new Address4("126.255.255.255")));
-            assert(!new Address4("127.0.0.1").substract([1]).eq(new Address4("126.255.255.255")));
+            assert.deepEqual(new Address4("127.0.0.1").substract([2]).getOctets(), [126, 255, 255, 255]);
+            assert.notDeepEqual(new Address4("127.0.0.1").substract([1]).getOctets(), [126, 255, 255, 255]);
         });
     });
     describe("comparisons", function() {
