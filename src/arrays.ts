@@ -10,7 +10,7 @@ export const enum comparison {
 
 export function compareNumberArrays(
     left: ReadonlyArray<number>,
-    right: ReadonlyArray<number>
+    right: ReadonlyArray<number>,
 ): comparison {
     if (left.length > right.length) {
         return comparison.Greater;

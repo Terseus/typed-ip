@@ -1,8 +1,8 @@
 import * as assert from "assert";
 import {
-    AddressValueError,
     Address,
     Address4,
+    AddressValueError,
 } from "../src";
 
 
@@ -70,7 +70,7 @@ describe("Address4", function() {
             assert.throws(() => new Address4([-1]), AddressValueError);
             assert.throws(() => new Address4([256, 0, 0, 0]), AddressValueError);
         });
-        it("should be subclass of Address", function () {
+        it("should be subclass of Address", function() {
             assert(new Address4(IPV4_VALID[0]) instanceof Address);
         });
     });

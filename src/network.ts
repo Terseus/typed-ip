@@ -1,33 +1,37 @@
 import {
     ByteArray,
-} from './arrays';
+} from "./arrays";
 
 import {
     Address,
     Address4,
-} from './address';
+} from "./address";
 
 import {
     AddressValueError,
-} from './exceptions';
+} from "./exceptions";
 
 import {
-    NETMASK_OCTETS,
     DECIMAL_DIGITS,
     IPV4_BYTES,
     IPV4_LENGTH,
-} from './constants';
+    NETMASK_OCTETS,
+} from "./constants";
 
 export abstract class Network<AddressType extends Address> {
     private addressConstructor: {new(input: ByteArray): AddressType};
     private _address: AddressType;
-    private _netmask: AddressType
+    private _netmask: AddressType;
     private _prefix: number;
     private _hostmask: AddressType;
     private _broadcast: AddressType;
     private _numAddresses: number;
 
-    protected constructor (address: AddressType, netmask: AddressType, addressConstructor: {new(input: ByteArray): AddressType}) {
+    protected constructor(
+        address: AddressType,
+        netmask: AddressType,
+        addressConstructor: {new(input: ByteArray): AddressType},
+    ) {
         this.addressConstructor = addressConstructor;
         this._address = address;
         this._netmask = netmask;
@@ -54,7 +58,7 @@ export abstract class Network<AddressType extends Address> {
     get hostmask() {
         if (typeof this._hostmask === "undefined") {
             this._hostmask = new this.addressConstructor(
-                this.netmask.octets.map((octet) => ~octet & 0xff)
+                this.netmask.octets.map((octet) => ~octet & 0xff),
             );
         }
         return this._hostmask;
@@ -63,9 +67,9 @@ export abstract class Network<AddressType extends Address> {
     get broadcast() {
         if (typeof this._broadcast === "undefined") {
             this._broadcast = new this.addressConstructor(Uint8Array.from(
-                this.address.octets.keys()
+                this.address.octets.keys(),
             ).map(
-                (key) => this.address.octets[key] | this.hostmask.octets[key]
+                (key) => this.address.octets[key] | this.hostmask.octets[key],
             ));
         }
         return this._broadcast;
@@ -100,7 +104,7 @@ export abstract class Network<AddressType extends Address> {
 }
 
 
-export class Network4 extends Network<Address4>{
+export class Network4 extends Network<Address4> {
     public constructor(input: string) {
         const [subaddress, subnetmask, nothing] = input.split("/");
         if (typeof nothing !== "undefined") {
@@ -112,6 +116,7 @@ export class Network4 extends Network<Address4>{
         }
 
         const address = new Address4(subaddress);
+        let netmask = null;
         if (Array.from(subnetmask).every((ch) => DECIMAL_DIGITS.includes(ch))) {
             const prefix = parseInt(subnetmask, 10);
             if (prefix < 0 || prefix > IPV4_LENGTH) {
@@ -126,9 +131,9 @@ export class Network4 extends Network<Address4>{
             if (partialByte > 0) {
                 bytes[IPV4_BYTES - fullBytes] = NETMASK_OCTETS[partialByte];
             }
-            var netmask = new Address4(bytes);
+            netmask = new Address4(bytes);
         } else {
-            var netmask = new Address4(subnetmask);
+            netmask = new Address4(subnetmask);
             if (!netmask.octets.every((octet) => NETMASK_OCTETS.includes(octet))) {
                 throw new AddressValueError(subnetmask);
             }

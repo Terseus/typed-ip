@@ -1,19 +1,19 @@
 import {
-    comparison,
+    addByteArrays,
     ByteArray,
     compareNumberArrays,
-    addByteArrays,
+    comparison,
     substractByteArrays,
-} from './arrays';
+} from "./arrays";
 
 import {
     AddressValueError,
-} from './exceptions';
+} from "./exceptions";
 
 import {
     DECIMAL_DIGITS,
     IPV4_BYTES,
-} from './constants';
+} from "./constants";
 
 
 export abstract class Address {
@@ -34,37 +34,37 @@ export abstract class Address {
     }
 
     public eq(other: this) {
-        return compareNumberArrays(<any>this.octets, <any>other.octets) === comparison.Equal;
+        return compareNumberArrays(this.octets as any, other.octets as any) === comparison.Equal;
     }
 
     public ne(other: this) {
-        return compareNumberArrays(<any>this.octets, <any>other.octets) !== comparison.Equal;
+        return compareNumberArrays(this.octets as any, other.octets as any) !== comparison.Equal;
     }
 
     public gt(other: this) {
-        return compareNumberArrays(<any>this.octets, <any>other.octets) === comparison.Greater;
+        return compareNumberArrays(this.octets as any, other.octets as any) === comparison.Greater;
     }
 
     public lt(other: this) {
-        return compareNumberArrays(<any>this.octets, <any>other.octets) === comparison.Lesser;
+        return compareNumberArrays(this.octets as any, other.octets as any) === comparison.Lesser;
     }
 
     public ge(other: this) {
-        const result = compareNumberArrays(<any>this.octets, <any>other.octets);
+        const result = compareNumberArrays(this.octets as any, other.octets as any);
         return result === comparison.Greater || result === comparison.Equal;
     }
 
     public le(other: this) {
-        const result = compareNumberArrays(<any>this.octets, <any>other.octets);
+        const result = compareNumberArrays(this.octets as any, other.octets as any);
         return result === comparison.Lesser || result === comparison.Equal;
     }
 
     public add(amount: ReadonlyArray<number>): this {
-        return new (<any> this.constructor)(addByteArrays(<any>this.octets, amount));
+        return new (this.constructor as any)(addByteArrays(this.octets as any, amount));
     }
 
     public substract(amount: ReadonlyArray<number>): this {
-        return new (<any> this.constructor)(substractByteArrays(<any>this.octets, amount));
+        return new (this.constructor as any)(substractByteArrays(this.octets as any, amount));
     }
 }
 
@@ -72,10 +72,7 @@ export abstract class Address {
 export class Address4 extends Address {
     private _ipString: string;
 
-    public constructor(input: string);
-    public constructor(input: ReadonlyArray<number>);
-    public constructor(input: ByteArray);
-    public constructor(input: any) {
+    public constructor(input: string | ReadonlyArray<number> | ByteArray) {
         if (input instanceof Uint8Array) {
             super(input);
         } else if (input instanceof Array) {

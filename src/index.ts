@@ -1,13 +1,13 @@
 export {
     Address,
     Address4,
-} from './address';
+} from "./address";
 
 export {
     Network,
     Network4,
-} from './network';
+} from "./network";
 
 export {
     AddressValueError,
-} from './exceptions';
+} from "./exceptions";

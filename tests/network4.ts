@@ -1,9 +1,9 @@
-import * as assert from 'assert';
+import * as assert from "assert";
 import {
     Address4,
     Network,
     Network4,
-} from '../src';
+} from "../src";
 
 interface NetworkInfo {
     stringAddress: string;
