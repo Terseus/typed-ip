@@ -1,7 +1,7 @@
 import {
     addByteArrays,
     ByteArray,
-    compareNumberArrays,
+    compareByteArrays,
     comparison,
     substractByteArrays,
 } from "./arrays";
@@ -34,37 +34,37 @@ export abstract class Address {
     }
 
     public eq(other: this) {
-        return compareNumberArrays(this.octets as any, other.octets as any) === comparison.Equal;
+        return compareByteArrays(this.octets, other.octets) === comparison.Equal;
     }
 
     public ne(other: this) {
-        return compareNumberArrays(this.octets as any, other.octets as any) !== comparison.Equal;
+        return compareByteArrays(this.octets, other.octets) !== comparison.Equal;
     }
 
     public gt(other: this) {
-        return compareNumberArrays(this.octets as any, other.octets as any) === comparison.Greater;
+        return compareByteArrays(this.octets, other.octets) === comparison.Greater;
     }
 
     public lt(other: this) {
-        return compareNumberArrays(this.octets as any, other.octets as any) === comparison.Lesser;
+        return compareByteArrays(this.octets , other.octets ) === comparison.Lesser;
     }
 
     public ge(other: this) {
-        const result = compareNumberArrays(this.octets as any, other.octets as any);
+        const result = compareByteArrays(this.octets , other.octets );
         return result === comparison.Greater || result === comparison.Equal;
     }
 
     public le(other: this) {
-        const result = compareNumberArrays(this.octets as any, other.octets as any);
+        const result = compareByteArrays(this.octets , other.octets );
         return result === comparison.Lesser || result === comparison.Equal;
     }
 
     public add(amount: ReadonlyArray<number>): this {
-        return new (this.constructor as any)(addByteArrays(this.octets as any, amount));
+        return new (this.constructor as any)(addByteArrays(this.octets , new Uint8Array(amount)));
     }
 
     public substract(amount: ReadonlyArray<number>): this {
-        return new (this.constructor as any)(substractByteArrays(this.octets as any, amount));
+        return new (this.constructor as any)(substractByteArrays(this.octets , new Uint8Array(amount)));
     }
 }
 

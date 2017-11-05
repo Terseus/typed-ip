@@ -8,9 +8,9 @@ export const enum comparison {
 }
 
 
-export function compareNumberArrays(
-    left: ReadonlyArray<number>,
-    right: ReadonlyArray<number>,
+export function compareByteArrays(
+    left: ByteArray,
+    right: ByteArray,
 ): comparison {
     if (left.length > right.length) {
         return comparison.Greater;
@@ -34,12 +34,15 @@ export function compareNumberArrays(
 }
 
 
-export function addByteArrays(left: ReadonlyArray<number>, right: ReadonlyArray<number>): ByteArray {
+export function addByteArrays(
+    left: ByteArray,
+    right: ByteArray,
+): ByteArray {
     if (right.length > left.length) {
         throw new Error("Unsupported operation: right cannot have more elements than left");
     }
     if (right.length < left.length) {
-        right = Array(left.length - right.length).fill(0x00).concat(right);
+        right = new Uint8Array(Array(left.length - right.length).fill(0x00).concat(right));
     }
     const copy = new Uint8Array(left);
     let carry = 0;
@@ -68,12 +71,15 @@ export function addByteArrays(left: ReadonlyArray<number>, right: ReadonlyArray<
 }
 
 
-export function substractByteArrays(left: ReadonlyArray<number>, right: ReadonlyArray<number>): ByteArray {
+export function substractByteArrays(
+    left: ByteArray,
+    right: ByteArray,
+): ByteArray {
     if (right.length > left.length) {
         throw new Error("Unsupported operation: right cannot have more elements than left");
     }
     if (right.length < left.length) {
-        right = Array(left.length - right.length).fill(0x00).concat(right);
+        right = new Uint8Array(Array(left.length - right.length).fill(0x00).concat(right));
     }
     const copy = new Uint8Array(left);
     let carry = 0;
