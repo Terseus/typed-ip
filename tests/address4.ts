@@ -46,8 +46,8 @@ describe("Address4", function() {
         it("should accept valid strings values", function() {
             for (const ipString in IPV4_VALID) {
                 const ip = new Address4(ipString);
-                assert.deepEqual(ip.octets, IPV4_VALID[ipString]);
-                assert.equal(ip.ipString, ipString);
+                assert.deepEqual(ip.getOctets(), IPV4_VALID[ipString]);
+                assert.equal(ip.getIpString(), ipString);
             }
         });
         it("should reject invalid string values", function() {
@@ -62,8 +62,8 @@ describe("Address4", function() {
         it("should accept valid octets values", function() {
             for (const ipString in IPV4_VALID) {
                 const ip = new Address4(IPV4_VALID[ipString]);
-                assert.equal(ip.ipString, ipString);
-                assert.deepEqual(ip.octets, IPV4_VALID[ipString]);
+                assert.equal(ip.getIpString(), ipString);
+                assert.deepEqual(ip.getOctets(), IPV4_VALID[ipString]);
             }
         });
         it("should reject invalid octets values", function() {
@@ -116,8 +116,8 @@ describe("Address4", function() {
     });
     describe("octets", function() {
         it("should return correct octets", function() {
-            assertArrayEquals(Array.from(new Address4("127.0.0.1").octets), [127, 0, 0, 1]);
-            assertArrayEquals(Array.from(new Address4("255.255.255.255").octets), [255, 255, 255, 255]);
+            assertArrayEquals(Array.from(new Address4("127.0.0.1").getOctets()), [127, 0, 0, 1]);
+            assertArrayEquals(Array.from(new Address4("255.255.255.255").getOctets()), [255, 255, 255, 255]);
         });
     });
 });

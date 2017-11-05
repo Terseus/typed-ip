@@ -45,25 +45,25 @@ export abstract class Network<AddressType extends Address> {
     }
 
     /**
-     * The network address.
+     * Returns the network address.
      */
-    get address(): AddressType {
+    public getAddress(): AddressType {
         return this._address;
     }
 
     /**
-     * The network mask.
+     * Returns the network mask.
      */
-    get netmask(): AddressType {
+    public getNetmask(): AddressType {
         return this._netmask;
     }
 
     /**
-     * The network prefix.
+     * Returns the network prefix.
      */
-    get prefix(): number {
+    public getPrefix(): number {
         if (typeof this._prefix === "undefined") {
-            this._prefix = this.netmask.octets.reduce(
+            this._prefix = this.getNetmask().getOctets().reduce(
                 (prefix, octet) => prefix + NETMASK_OCTETS.indexOf(octet),
                 0,
             );
@@ -72,43 +72,43 @@ export abstract class Network<AddressType extends Address> {
     }
 
     /**
-     * The network hostmask (the netmask inverted).
+     * Returns the network hostmask (the netmask inverted).
      */
-    get hostmask(): AddressType {
+    public getHostmask(): AddressType {
         if (typeof this._hostmask === "undefined") {
             this._hostmask = new this.addressConstructor(
-                this.netmask.octets.map((octet) => ~octet & 0xff),
+                this.getNetmask().getOctets().map((octet) => ~octet & 0xff),
             );
         }
         return this._hostmask;
     }
 
     /**
-     * The network broadcast address.
+     * Returns the network broadcast address.
      */
-    get broadcast(): AddressType {
+    public getBroadcast(): AddressType {
         if (typeof this._broadcast === "undefined") {
             this._broadcast = new this.addressConstructor(Uint8Array.from(
-                this.address.octets.keys(),
+                this.getAddress().getOctets().keys(),
             ).map(
-                (key) => this.address.octets[key] | this.hostmask.octets[key],
+                (key) => this.getAddress().getOctets()[key] | this.getHostmask().getOctets()[key],
             ));
         }
         return this._broadcast;
     }
 
     /**
-     * The number of addresses in this network.
+     * Returns the number of addresses in this network.
      *
      * WARNING!
      * Due to Javascript limitations (and because I don't want to depend on a
      * bignum library) this function may returns inaccurate results if the
      * network can hold more than 2^53 addresses.
      */
-    get numAddresses(): number {
+    public getNumAddresses(): number {
         if (typeof this._numAddresses === "undefined") {
-            this._numAddresses = this.hostmask.octets.reduce(
-                (total, octet, index) => total + octet * (256 ** (this.hostmask.octets.length - index - 1)),
+            this._numAddresses = this.getHostmask().getOctets().reduce(
+                (total, octet, index) => total + octet * (256 ** (this.getHostmask().getOctets().length - index - 1)),
                 1,
             );
         }
@@ -124,11 +124,11 @@ export abstract class Network<AddressType extends Address> {
      */
     public * hosts(start?: AddressType): IterableIterator<AddressType> {
         if (typeof start === "undefined") {
-            start = this.address;
+            start = this.getAddress();
         }
 
         let address = start;
-        const maxAddress = this.broadcast.substract([1]);
+        const maxAddress = this.getBroadcast().substract([1]);
         while (address.lt(maxAddress)) {
             address = address.add([1]);
             yield address;
@@ -139,7 +139,7 @@ export abstract class Network<AddressType extends Address> {
      * Returns if the network holds the given address.
      */
     public contains(other: AddressType): boolean {
-        return (this.broadcast.ge(other) && this.address.le(other));
+        return (this.getBroadcast().ge(other) && this.getAddress().le(other));
     }
 }
 
@@ -185,7 +185,7 @@ export class Network4 extends Network<Address4> {
             netmask = new Address4(bytes);
         } else {
             netmask = new Address4(subnetmask);
-            if (!netmask.octets.every((octet) => NETMASK_OCTETS.includes(octet))) {
+            if (!netmask.getOctets().every((octet) => NETMASK_OCTETS.includes(octet))) {
                 throw new AddressValueError(subnetmask);
             }
         }

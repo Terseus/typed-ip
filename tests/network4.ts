@@ -66,40 +66,40 @@ const IPV4_NETWORKS_VALID: NetworkInfo[] = (() => {
 
 function assertNetworkCheck(net: Network4, data: NetworkInfo) {
     assert(net instanceof Network);
-    assert(net.address instanceof Address4);
-    assert.equal(net.address.ipString, data.stringAddress);
-    assert.deepEqual(net.address.octets, data.octetsAddress);
-    assert(net.netmask instanceof Address4);
-    assert.equal(net.netmask.ipString, data.stringNetmask);
-    assert.deepEqual(net.netmask.octets, data.octetsNetmask);
-    assert.equal(net.prefix, data.prefix);
-    assert(net.hostmask instanceof Address4);
-    assert.equal(net.hostmask.ipString, data.stringHostmask);
-    assert.deepEqual(net.hostmask.octets, data.octetsHostmask);
-    assert(net.broadcast instanceof Address4);
-    assert.equal(net.broadcast.ipString, data.stringBroadcast);
-    assert.deepEqual(net.broadcast.octets, data.octetsBroadcast);
-    assert.equal(net.numAddresses, data.numAddresses);
-    assert.equal(net.hosts().next().value.ipString, new Address4(data.octetsAddress).add([1]).ipString);
+    assert(net.getAddress() instanceof Address4);
+    assert.equal(net.getAddress().getIpString(), data.stringAddress);
+    assert.deepEqual(net.getAddress().getOctets(), data.octetsAddress);
+    assert(net.getNetmask() instanceof Address4);
+    assert.equal(net.getNetmask().getIpString(), data.stringNetmask);
+    assert.deepEqual(net.getNetmask().getOctets(), data.octetsNetmask);
+    assert.equal(net.getPrefix(), data.prefix);
+    assert(net.getHostmask() instanceof Address4);
+    assert.equal(net.getHostmask().getIpString(), data.stringHostmask);
+    assert.deepEqual(net.getHostmask().getOctets(), data.octetsHostmask);
+    assert(net.getBroadcast() instanceof Address4);
+    assert.equal(net.getBroadcast().getIpString(), data.stringBroadcast);
+    assert.deepEqual(net.getBroadcast().getOctets(), data.octetsBroadcast);
+    assert.equal(net.getNumAddresses(), data.numAddresses);
+    assert.equal(net.hosts().next().value.getIpString(), new Address4(data.octetsAddress).add([1]).getIpString());
     assert(
         net.hosts(new Address4(data.octetsBroadcast).substract([1])).next().done,
-        "Last IP check failed: " + new Address4(data.octetsBroadcast).substract([1]).ipString,
+        "Last IP check failed: " + new Address4(data.octetsBroadcast).substract([1]).getIpString(),
     );
     assert(
         net.contains(new Address4(data.octetsAddress).add([1])),
-        "First IP contains failed: " + new Address4(data.octetsAddress).add([1]).ipString,
+        "First IP contains failed: " + new Address4(data.octetsAddress).add([1]).getIpString(),
     );
     assert(
         net.contains(new Address4(data.octetsBroadcast).substract([1])),
-        "Last IP contains failed: " + new Address4(data.octetsBroadcast).substract([1]).ipString,
+        "Last IP contains failed: " + new Address4(data.octetsBroadcast).substract([1]).getIpString(),
     );
     assert(
         !net.contains(new Address4(data.octetsAddress).substract([1])),
-        "Before first IP contains failed: " + new Address4(data.octetsAddress).substract([1]).ipString,
+        "Before first IP contains failed: " + new Address4(data.octetsAddress).substract([1]).getIpString(),
     );
     assert(
         !net.contains(new Address4(data.octetsBroadcast).add([1])),
-        "After last IP contains failed: " + new Address4(data.octetsBroadcast).add([1]).ipString,
+        "After last IP contains failed: " + new Address4(data.octetsBroadcast).add([1]).getIpString(),
     );
 }
 

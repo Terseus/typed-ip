@@ -30,59 +30,60 @@ export abstract class Address {
     }
 
     /**
-     * The string representation of the address.
+     * Returns the string representation of the address.
      */
-    abstract get ipString(): string;
+    public abstract getIpString(): string;
 
     /**
-     * The octets of the address as an array of bytes (number from 0 to 255).
+     * Returns the octets of the address as an array of bytes (number from 0 to
+     * 255).
      *
      * The length of this array is determined by the address size.
      */
-    get octets(): ByteArray {
+    public getOctets(): ByteArray {
         return this._octets;
     }
 
     /**
-     * Returns `ipString`.
+     * Returns `getIpString()`.
      */
     public toString(): string {
-        return this.ipString;
+        return this.getIpString();
     }
 
     /**
      * Returns if `this` is the same address as `other`.
      */
     public eq(other: this): boolean {
-        return compareByteArrays(this.octets, other.octets) === comparison.Equal;
+        return compareByteArrays(this.getOctets(), other.getOctets()) === comparison.Equal;
     }
 
     /**
      * Returns if `this` is a different address than `other`.
      */
     public ne(other: this): boolean {
-        return compareByteArrays(this.octets, other.octets) !== comparison.Equal;
+        return compareByteArrays(this.getOctets(), other.getOctets()) !== comparison.Equal;
     }
 
     /**
      * Returns if `this` is greater than `other`.
      */
     public gt(other: this): boolean {
-        return compareByteArrays(this.octets, other.octets) === comparison.Greater;
+        return compareByteArrays(this.getOctets(), other.getOctets()) === comparison.Greater;
     }
 
     /**
      * Returns if `this` is lesser than `other`.
      */
     public lt(other: this): boolean {
-        return compareByteArrays(this.octets , other.octets ) === comparison.Lesser;
+        return compareByteArrays(this.getOctets() , other.getOctets() ) === comparison.Lesser;
     }
 
     /**
      * Returns if `this` is greater or equal than `other`.
      */
     public ge(other: this): boolean {
-        const result = compareByteArrays(this.octets , other.octets );
+        const result = compareByteArrays(this.getOctets() , other.getOctets() );
         return result === comparison.Greater || result === comparison.Equal;
     }
 
@@ -90,7 +91,7 @@ export abstract class Address {
      * Returns if `this` is lesser or equal than `other`.
      */
     public le(other: this): boolean {
-        const result = compareByteArrays(this.octets , other.octets );
+        const result = compareByteArrays(this.getOctets() , other.getOctets() );
         return result === comparison.Lesser || result === comparison.Equal;
     }
 
@@ -103,7 +104,7 @@ export abstract class Address {
      * treated as the lowest values.
      */
     public add(amount: ReadonlyArray<number>): this {
-        return new (this.constructor as any)(addByteArrays(this.octets , new Uint8Array(amount)));
+        return new (this.constructor as any)(addByteArrays(this.getOctets() , new Uint8Array(amount)));
     }
 
     /**
@@ -115,7 +116,7 @@ export abstract class Address {
      * treated as the lowest values.
      */
     public substract(amount: ReadonlyArray<number>): this {
-        return new (this.constructor as any)(substractByteArrays(this.octets , new Uint8Array(amount)));
+        return new (this.constructor as any)(substractByteArrays(this.getOctets() , new Uint8Array(amount)));
     }
 }
 
@@ -174,9 +175,9 @@ export class Address4 extends Address {
         }
     }
 
-    public get ipString(): string {
+    public getIpString(): string {
         if (typeof this._ipString === "undefined") {
-            this._ipString = this.octets.join(".");
+            this._ipString = this.getOctets().join(".");
         }
         return this._ipString;
     }
