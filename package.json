@@ -8,7 +8,7 @@
         "pack": "npm run build && npm pack",
         "clean": "rm -rf dist/",
         "cleandoc": "rm -rf docs/",
-        "doc": "npm run cleandoc && typedoc src/"
+        "doc": "npm run cleandoc && typedoc src/ --readme none"
     },
     "main": "./dist/src/index.js",
     "types": "./dist/src/index.d.ts",
