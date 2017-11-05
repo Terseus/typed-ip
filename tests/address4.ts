@@ -1,4 +1,5 @@
 import * as assert from "assert";
+
 import {
     Address,
     Address4,
@@ -17,28 +18,6 @@ const IPV4_VALID: AddressInfo = {
     "192.168.0.1": [192, 168, 0, 1],
     "255.255.255.255": [255, 255, 255, 255],
 };
-
-
-function compareArray<T>(array1: T[], array2: T[]) {
-    if (array1.length !== array2.length) {
-        return false;
-    }
-
-    for (let index = 0; index < array1.length; index++) {
-        if (array1[index] !== array2[index]) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-
-function assertArrayEquals<T>(original: T[], expected: T[], message?: string) {
-    if (!compareArray(original, expected)) {
-        throw new Error(message || JSON.stringify(original) + " - " + JSON.stringify(expected));
-    }
-}
 
 
 describe("Address4", function() {
@@ -116,8 +95,8 @@ describe("Address4", function() {
     });
     describe("octets", function() {
         it("should return correct octets", function() {
-            assertArrayEquals(Array.from(new Address4("127.0.0.1").getOctets()), [127, 0, 0, 1]);
-            assertArrayEquals(Array.from(new Address4("255.255.255.255").getOctets()), [255, 255, 255, 255]);
+            assert.deepEqual(Array.from(new Address4("127.0.0.1").getOctets()), [127, 0, 0, 1]);
+            assert.deepEqual(Array.from(new Address4("255.255.255.255").getOctets()), [255, 255, 255, 255]);
         });
     });
 });
