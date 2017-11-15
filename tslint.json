@@ -16,7 +16,13 @@
         ],
         "forin": false,
         "interface-name": false,
-        "only-arrow-functions": false
+        "only-arrow-functions": false,
+        "member-ordering": [
+            true,
+            {
+                "order": "fields-first"
+            }
+        ]
     },
     "rulesDirectory": []
 }

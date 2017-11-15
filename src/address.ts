@@ -1,9 +1,6 @@
 import {
-    addByteArrays,
-    ByteArray,
-    compareByteArrays,
+    ByteContainer,
     comparison,
-    substractByteArrays,
 } from "./arrays";
 
 import {
@@ -23,10 +20,10 @@ import {
  * library except for type declarations and checks.
  */
 export abstract class Address {
-    private _octets: ByteArray;
+    private byteContainer: ByteContainer;
 
-    public constructor(octets: ByteArray) {
-        this._octets = octets;
+    public constructor(byteContainer: ByteContainer) {
+        this.byteContainer = byteContainer;
     }
 
     /**
@@ -40,8 +37,8 @@ export abstract class Address {
      *
      * The length of this array is determined by the address size.
      */
-    public getOctets(): ByteArray {
-        return this._octets;
+    public getOctets(): ReadonlyArray<number> {
+        return this.byteContainer.bytes;
     }
 
     /**
@@ -55,35 +52,35 @@ export abstract class Address {
      * Returns if `this` is the same address as `other`.
      */
     public eq(other: this): boolean {
-        return compareByteArrays(this.getOctets(), other.getOctets()) === comparison.Equal;
+        return this.byteContainer.compareWith(other.getOctets()) === comparison.Equal;
     }
 
     /**
      * Returns if `this` is a different address than `other`.
      */
     public ne(other: this): boolean {
-        return compareByteArrays(this.getOctets(), other.getOctets()) !== comparison.Equal;
+        return this.byteContainer.compareWith(other.getOctets()) !== comparison.Equal;
     }
 
     /**
      * Returns if `this` is greater than `other`.
      */
     public gt(other: this): boolean {
-        return compareByteArrays(this.getOctets(), other.getOctets()) === comparison.Greater;
+        return this.byteContainer.compareWith(other.getOctets()) === comparison.Greater;
     }
 
     /**
      * Returns if `this` is lesser than `other`.
      */
     public lt(other: this): boolean {
-        return compareByteArrays(this.getOctets() , other.getOctets() ) === comparison.Lesser;
+        return this.byteContainer.compareWith(other.getOctets()) === comparison.Lesser;
     }
 
     /**
      * Returns if `this` is greater or equal than `other`.
      */
     public ge(other: this): boolean {
-        const result = compareByteArrays(this.getOctets() , other.getOctets() );
+        const result = this.byteContainer.compareWith(other.getOctets());
         return result === comparison.Greater || result === comparison.Equal;
     }
 
@@ -91,7 +88,7 @@ export abstract class Address {
      * Returns if `this` is lesser or equal than `other`.
      */
     public le(other: this): boolean {
-        const result = compareByteArrays(this.getOctets() , other.getOctets() );
+        const result = this.byteContainer.compareWith(other.getOctets());
         return result === comparison.Lesser || result === comparison.Equal;
     }
 
@@ -104,7 +101,7 @@ export abstract class Address {
      * treated as the lowest values.
      */
     public add(amount: ReadonlyArray<number>): this {
-        return new (this.constructor as any)(addByteArrays(this.getOctets() , new Uint8Array(amount)));
+        return new (this.constructor as any)(this.byteContainer.add(amount));
     }
 
     /**
@@ -116,7 +113,7 @@ export abstract class Address {
      * treated as the lowest values.
      */
     public substract(amount: ReadonlyArray<number>): this {
-        return new (this.constructor as any)(substractByteArrays(this.getOctets() , new Uint8Array(amount)));
+        return new (this.constructor as any)(this.byteContainer.subtract(amount));
     }
 }
 
@@ -135,10 +132,10 @@ export class Address4 extends Address {
      * Possible inputs are:
      * - A valid IPv4 as string.
      * - A number array with 4 octets.
-     * - A [[ByteArray]] - for internal use only.
+     * - A [[ByteContainer]] - for internal use only.
      */
-    public constructor(input: string | ReadonlyArray<number> | ByteArray) {
-        if (input instanceof Uint8Array) {
+    public constructor(input: string | ReadonlyArray<number> | ByteContainer) {
+        if (input instanceof ByteContainer) {
             super(input);
         } else if (input instanceof Array) {
             if (input.length > IPV4_BYTES) {
@@ -150,14 +147,14 @@ export class Address4 extends Address {
             if (input.length < IPV4_BYTES) {
                 input = Array(IPV4_BYTES - input.length).fill(0x00).concat(input);
             }
-            super(new Uint8Array(input));
+            super(new ByteContainer(input));
         } else if (typeof input === "string") {
             const addressSplitted = input.split(".");
             if (addressSplitted.length !== IPV4_BYTES) {
                 throw new AddressValueError(input);
             }
 
-            const octets = new Uint8Array(addressSplitted.map(
+            const octets = new ByteContainer(addressSplitted.map(
                 (octet) => {
                     if (!Array.from(octet).every((ch) => DECIMAL_DIGITS.includes(ch))) {
                         throw new AddressValueError(input as string);

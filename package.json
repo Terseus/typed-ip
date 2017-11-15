@@ -2,7 +2,7 @@
     "name": "tsipaddr",
     "version": "0.1.0",
     "scripts": {
-        "lint": "tslint -c tslint.json -p tsconfig.json",
+        "lint": "tslint -c tslint.json -t verbose -p tsconfig.json",
         "test": "npm run build && mocha dist/tests/*.js",
         "build": "npm run clean && tsc --outDir dist/",
         "pack": "npm run build && npm pack",

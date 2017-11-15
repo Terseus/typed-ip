@@ -1,5 +1,5 @@
 import {
-    ByteArray,
+    ByteContainer,
 } from "./arrays";
 
 import {
@@ -26,7 +26,7 @@ import {
  * library except for type declarations and checks.
  */
 export abstract class Network<AddressType extends Address> {
-    private addressConstructor: {new(input: ByteArray): AddressType};
+    private addressConstructor: {new(input: ByteContainer): AddressType};
     private _address: AddressType;
     private _netmask: AddressType;
     private _prefix: number;
@@ -37,7 +37,7 @@ export abstract class Network<AddressType extends Address> {
     protected constructor(
         address: AddressType,
         netmask: AddressType,
-        addressConstructor: {new(input: ByteArray): AddressType},
+        addressConstructor: {new(input: ByteContainer): AddressType},
     ) {
         this.addressConstructor = addressConstructor;
         this._address = address;
@@ -77,7 +77,7 @@ export abstract class Network<AddressType extends Address> {
     public getHostmask(): AddressType {
         if (typeof this._hostmask === "undefined") {
             this._hostmask = new this.addressConstructor(
-                this.getNetmask().getOctets().map((octet) => ~octet & 0xff),
+                new ByteContainer(this.getNetmask().getOctets().map((octet) => ~octet & 0xff)),
             );
         }
         return this._hostmask;
@@ -88,10 +88,10 @@ export abstract class Network<AddressType extends Address> {
      */
     public getBroadcast(): AddressType {
         if (typeof this._broadcast === "undefined") {
-            this._broadcast = new this.addressConstructor(Uint8Array.from(
-                this.getAddress().getOctets().keys(),
-            ).map(
-                (key) => this.getAddress().getOctets()[key] | this.getHostmask().getOctets()[key],
+            this._broadcast = new this.addressConstructor(new ByteContainer(
+                Array.from(this.getAddress().getOctets().keys()).map(
+                    (key) => this.getAddress().getOctets()[key] | this.getHostmask().getOctets()[key],
+                ),
             ));
         }
         return this._broadcast;
@@ -175,7 +175,7 @@ export class Network4 extends Network<Address4> {
             }
             const fullBytes = Math.floor(prefix / 8);
             const partialByte = prefix % 8;
-            const bytes: number[] = Array(IPV4_BYTES);
+            const bytes: number[] = new Array(IPV4_BYTES).fill(0);
             if (fullBytes > 0) {
                 bytes.fill(0xff, 0, fullBytes);
             }

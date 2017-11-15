@@ -1,15 +1,4 @@
 /**
- * A readonly `Uint8Array`.
- *
- * Used to have (and give) the guarantee that the passed in and out arrays
- * will not be modified.
- */
-export interface ByteArray extends Uint8Array {
-    readonly [index: number]: number;
-}
-
-
-/**
  * @hidden
  */
 export const enum comparison {
@@ -17,110 +6,109 @@ export const enum comparison {
 }
 
 
-/**
- * @hidden
- */
-export function compareByteArrays(
-    left: ByteArray,
-    right: ByteArray,
-): comparison {
-    if (left.length > right.length) {
-        return comparison.Greater;
-    }
-
-    if (right.length > left.length) {
-        return comparison.Lesser;
-    }
-
-    for (let index = 0; index < left.length; index++) {
-        if (left[index] > right[index]) {
-            return comparison.Greater;
+function checkInputArray(input: ReadonlyArray<number>): void {
+    input.forEach((digit) => {
+        if (digit < 0 || digit > 255) {
+            throw new Error("Invalid bytes array: digits should be between 0 and 255");
         }
-
-        if (left[index] < right[index]) {
-            return comparison.Lesser;
-        }
-    }
-
-    return comparison.Equal;
+    });
 }
 
 
 /**
+ * An immutable container of bytes.
+ *
+ * For internal use only.
+ *
  * @hidden
  */
-export function addByteArrays(
-    left: ByteArray,
-    right: ByteArray,
-): ByteArray {
-    if (right.length > left.length) {
-        throw new Error("Unsupported operation: right cannot have more elements than left");
+export class ByteContainer {
+    public readonly length: number;
+    public readonly bytes: ReadonlyArray<number>;
+
+    public constructor(input: ReadonlyArray<number>) {
+        this.bytes = input;
+        this.length = this.bytes.length;
     }
-    if (right.length < left.length) {
-        right = new Uint8Array(Array(left.length - right.length).fill(0x00).concat(right));
+
+    public compareWith(other: ReadonlyArray<number>): comparison {
+        for (let index = 0; index < this.length; index++) {
+            const byteValue = other[index] || 0;
+            if (this.bytes[index] > byteValue) {
+                return comparison.Greater;
+            }
+            if (byteValue > this.bytes[index]) {
+                return comparison.Lesser;
+            }
+        }
+        return comparison.Equal;
     }
-    const copy = new Uint8Array(left);
-    let carry = 0;
-    for (let index = 0; index < right.length; index++) {
-        const rightIndex = right.length - index - 1;
-        if (right[rightIndex] + carry === 0) {
-            continue;
+
+    public add(input: ReadonlyArray<number>): ByteContainer {
+        if (input.length > this.length) {
+            throw new Error("Unsupported operation: input cannot have more elements than this");
+        }
+        checkInputArray(input);
+        if (this.length > input.length) {
+            input = new Array(this.length - input.length).fill(0x00).concat(input);
+        }
+        const copy = this.bytes.slice();
+        let carry = 0;
+        for (let index = 0; index < input.length; index++) {
+            const inputIndex = input.length - index - 1;
+            if (input[inputIndex] + carry === 0) {
+                continue;
+            }
+
+            const thisIndex = this.length - index - 1;
+            const sum = this.bytes[thisIndex] + input[inputIndex] + carry;
+            if (sum > 255) {
+                copy[thisIndex] = sum - 256;
+                carry = 1;
+            } else {
+                copy[thisIndex] = sum;
+                carry = 0;
+            }
         }
 
-        const leftIndex = left.length - index - 1;
-        const sum = left[leftIndex] + right[rightIndex] + carry;
-        if (sum > 255) {
-            copy[leftIndex] = sum - 256;
-            carry = 1;
-        } else {
-            copy[leftIndex] = sum;
-            carry = 0;
-        }
-    }
-
-    if (carry > 0) {
-        throw new Error("Overflow");
-    }
-
-    return copy;
-}
-
-
-/**
- * @hidden
- */
-export function substractByteArrays(
-    left: ByteArray,
-    right: ByteArray,
-): ByteArray {
-    if (right.length > left.length) {
-        throw new Error("Unsupported operation: right cannot have more elements than left");
-    }
-    if (right.length < left.length) {
-        right = new Uint8Array(Array(left.length - right.length).fill(0x00).concat(right));
-    }
-    const copy = new Uint8Array(left);
-    let carry = 0;
-    for (let index = 0; index < right.length; index++) {
-        const rightIndex = right.length - index - 1;
-        if (right[rightIndex] + carry === 0) {
-            continue;
+        if (carry > 0) {
+            throw new Error("Overflow");
         }
 
-        const leftIndex = left.length - index - 1;
-        const subs = left[leftIndex] - right[rightIndex] - carry;
-        if (subs < 0) {
-            copy[leftIndex] = subs + 256;
-            carry = 1;
-        } else {
-            copy[leftIndex] = subs;
-            carry = 0;
+        return new ByteContainer(copy);
+    }
+
+    public subtract(input: ReadonlyArray<number>): ByteContainer {
+        if (input.length > this.length) {
+            throw new Error("Unsupported operation: input cannot have more elements than this");
         }
-    }
+        checkInputArray(input);
+        if (this.length > input.length) {
+            input = new Array(this.length - input.length).fill(0x00).concat(input);
+        }
+        const copy = this.bytes.slice();
+        let carry = 0;
+        for (let index = 0; index < input.length; index++) {
+            const inputIndex = input.length - index - 1;
+            if (input[inputIndex] + carry === 0) {
+                continue;
+            }
 
-    if (carry > 0) {
-        throw new Error("Underflow");
-    }
+            const thisIndex = this.length - index - 1;
+            const subs = this.bytes[thisIndex] - input[inputIndex] - carry;
+            if (subs < 0) {
+                copy[thisIndex] = subs + 256;
+                carry = 1;
+            } else {
+                copy[thisIndex] = subs;
+                carry = 0;
+            }
+        }
 
-    return copy;
+        if (carry > 0) {
+            throw new Error("Underflow");
+        }
+
+        return new ByteContainer(copy);
+    }
 }

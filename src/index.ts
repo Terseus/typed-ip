@@ -1,8 +1,4 @@
 export {
-    ByteArray,
-} from "./arrays";
-
-export {
     Address,
     Address4,
 } from "./address";
