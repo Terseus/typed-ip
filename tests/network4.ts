@@ -14,8 +14,8 @@ interface NetworkInfo {
     prefix: number;
     stringNetmask: string;
     octetsNetmask: number[];
-    stringHostmask: string;
-    octetsHostmask: number[];
+    stringWildcard: string;
+    octetsWildcard: number[];
     stringBroadcast: string;
     octetsBroadcast: number[];
     numAddresses: number;
@@ -30,8 +30,8 @@ const IPV4_NETWORKS_VALID: NetworkInfo[] = (() => [{
         prefix: 24,
         stringNetmask: "255.255.255.0",
         octetsNetmask: [255, 255, 255, 0],
-        stringHostmask: "0.0.0.255",
-        octetsHostmask: [0, 0, 0, 255],
+        stringWildcard: "0.0.0.255",
+        octetsWildcard: [0, 0, 0, 255],
         stringBroadcast: "192.168.0.255",
         octetsBroadcast: [192, 168, 0, 255],
         numAddresses: 256,
@@ -43,8 +43,8 @@ const IPV4_NETWORKS_VALID: NetworkInfo[] = (() => [{
         prefix: 8,
         stringNetmask: "255.0.0.0",
         octetsNetmask: [255, 0, 0, 0],
-        stringHostmask: "0.255.255.255",
-        octetsHostmask: [0, 255, 255, 255],
+        stringWildcard: "0.255.255.255",
+        octetsWildcard: [0, 255, 255, 255],
         stringBroadcast: "10.255.255.255",
         octetsBroadcast: [10, 255, 255, 255],
         numAddresses: 16777216,
@@ -56,8 +56,8 @@ const IPV4_NETWORKS_VALID: NetworkInfo[] = (() => [{
         prefix: 20,
         stringNetmask: "255.255.240.0",
         octetsNetmask: [255, 255, 240, 0],
-        stringHostmask: "0.0.15.255",
-        octetsHostmask: [0, 0, 15, 255],
+        stringWildcard: "0.0.15.255",
+        octetsWildcard: [0, 0, 15, 255],
         stringBroadcast: "148.56.15.255",
         octetsBroadcast: [148, 56, 15, 255],
         numAddresses: 4096,
@@ -69,8 +69,8 @@ const IPV4_NETWORKS_VALID: NetworkInfo[] = (() => [{
         prefix: 21,
         stringNetmask: "255.255.248.0",
         octetsNetmask: [255, 255, 248, 0],
-        stringHostmask: "0.0.7.255",
-        octetsHostmask: [0, 0, 7, 255],
+        stringWildcard: "0.0.7.255",
+        octetsWildcard: [0, 0, 7, 255],
         stringBroadcast: "192.168.7.255",
         octetsBroadcast: [192, 168, 7, 255],
         numAddresses: 2048,
@@ -94,7 +94,7 @@ function describeTestNetwork(describeSuffix: string, inputAccessor: (data: Netwo
                 assert(net instanceof Network);
                 assert(net.getAddress() instanceof Address4);
                 assert(net.getNetmask() instanceof Address4);
-                assert(net.getHostmask() instanceof Address4);
+                assert(net.getWildcard() instanceof Address4);
                 assert(net.getBroadcast() instanceof Address4);
             });
         });
@@ -118,11 +118,11 @@ function describeTestNetwork(describeSuffix: string, inputAccessor: (data: Netwo
                 assert.equal(net.getPrefix(), data.prefix);
             });
         });
-        it("should match hostmask address", function() {
+        it("should match wildcard address", function() {
             IPV4_NETWORKS_VALID.forEach((data) => {
                 const net = new Network4(inputAccessor(data));
-                assert.equal(net.getHostmask().getIpString(), data.stringHostmask);
-                assert.deepEqual(net.getHostmask().getOctets(), data.octetsHostmask);
+                assert.equal(net.getWildcard().getIpString(), data.stringWildcard);
+                assert.deepEqual(net.getWildcard().getOctets(), data.octetsWildcard);
             });
         });
         it("should match broadcast address", function() {

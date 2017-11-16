@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   generate ES3 code with them.
 - All public methods are now explicitly typed.
 - Completely remove `ByteArray`, now `ReadonlyArray<number>` is used instead for public interfaces.
+- Renamed `getHostmask` with `getWildcard` along with all the internal names and comments.
 ### Fixed
 - Fixed network address calculation.
 

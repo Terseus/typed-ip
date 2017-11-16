@@ -30,7 +30,7 @@ export abstract class Network<AddressType extends Address> {
     private _address: AddressType;
     private _netmask: AddressType;
     private _prefix: number;
-    private _hostmask: AddressType;
+    private _wildcard: AddressType;
     private _broadcast: AddressType;
     private _numAddresses: number;
 
@@ -72,15 +72,15 @@ export abstract class Network<AddressType extends Address> {
     }
 
     /**
-     * Returns the network hostmask (the netmask inverted).
+     * Returns the network wildcard (the netmask inverted).
      */
-    public getHostmask(): AddressType {
-        if (typeof this._hostmask === "undefined") {
-            this._hostmask = new this.addressConstructor(
+    public getWildcard(): AddressType {
+        if (typeof this._wildcard === "undefined") {
+            this._wildcard = new this.addressConstructor(
                 new ByteContainer(this.getNetmask().getOctets().map((octet) => ~octet & 0xff)),
             );
         }
-        return this._hostmask;
+        return this._wildcard;
     }
 
     /**
@@ -90,7 +90,7 @@ export abstract class Network<AddressType extends Address> {
         if (typeof this._broadcast === "undefined") {
             this._broadcast = new this.addressConstructor(new ByteContainer(
                 Array.from(this.getAddress().getOctets().keys()).map(
-                    (key) => this.getAddress().getOctets()[key] | this.getHostmask().getOctets()[key],
+                    (key) => this.getAddress().getOctets()[key] | this.getWildcard().getOctets()[key],
                 ),
             ));
         }
@@ -107,8 +107,8 @@ export abstract class Network<AddressType extends Address> {
      */
     public getNumAddresses(): number {
         if (typeof this._numAddresses === "undefined") {
-            this._numAddresses = this.getHostmask().getOctets().reduce(
-                (total, octet, index) => total + octet * (256 ** (this.getHostmask().getOctets().length - index - 1)),
+            this._numAddresses = this.getWildcard().getOctets().reduce(
+                (total, octet, index) => total + octet * (256 ** (this.getWildcard().getOctets().length - index - 1)),
                 1,
             );
         }
