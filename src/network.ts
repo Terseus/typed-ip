@@ -166,8 +166,8 @@ export class Network4 extends Network<Address4> {
             throw new AddressValueError(input);
         }
 
-        const address = new Address4(subaddress);
-        let netmask = null;
+        const inputAddress = new Address4(subaddress);
+        let netmask: Address4;
         if (Array.from(subnetmask).every((ch) => DECIMAL_DIGITS.includes(ch))) {
             const prefix = parseInt(subnetmask, 10);
             if (prefix < 0 || prefix > IPV4_LENGTH) {
@@ -189,6 +189,9 @@ export class Network4 extends Network<Address4> {
                 throw new AddressValueError(subnetmask);
             }
         }
+        const address = new Address4(inputAddress.getOctets().map(
+            (value, index) => value & netmask.getOctets()[index],
+        ));
         super(address, netmask, Address4);
     }
 }

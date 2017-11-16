@@ -7,6 +7,8 @@ import {
 
 
 interface NetworkInfo {
+    inputPrefix: string;
+    inputAddress: string;
     stringAddress: string;
     octetsAddress: number[];
     prefix: number;
@@ -17,14 +19,12 @@ interface NetworkInfo {
     stringBroadcast: string;
     octetsBroadcast: number[];
     numAddresses: number;
-    inputPrefix: string;
-    inputAddress: string;
 }
 
-
-const IPV4_NETWORKS_VALID: NetworkInfo[] = (() => {
-    /* tslint:disable:object-literal-sort-keys */
-    return [{
+/* tslint:disable:object-literal-sort-keys */
+const IPV4_NETWORKS_VALID: NetworkInfo[] = (() => [{
+        inputAddress: "192.168.0.0/255.255.255.0",
+        inputPrefix: "192.168.0.0/24",
         stringAddress: "192.168.0.0",
         octetsAddress: [192, 168, 0, 0],
         prefix: 24,
@@ -36,6 +36,8 @@ const IPV4_NETWORKS_VALID: NetworkInfo[] = (() => {
         octetsBroadcast: [192, 168, 0, 255],
         numAddresses: 256,
     }, {
+        inputAddress: "10.0.0.0/255.0.0.0",
+        inputPrefix: "10.0.0.0/8",
         stringAddress: "10.0.0.0",
         octetsAddress: [10, 0, 0, 0],
         prefix: 8,
@@ -47,6 +49,8 @@ const IPV4_NETWORKS_VALID: NetworkInfo[] = (() => {
         octetsBroadcast: [10, 255, 255, 255],
         numAddresses: 16777216,
     }, {
+        inputAddress: "148.56.0.0/255.255.240.0",
+        inputPrefix: "148.56.0.0/20",
         stringAddress: "148.56.0.0",
         octetsAddress: [148, 56, 0, 0],
         prefix: 20,
@@ -57,12 +61,21 @@ const IPV4_NETWORKS_VALID: NetworkInfo[] = (() => {
         stringBroadcast: "148.56.15.255",
         octetsBroadcast: [148, 56, 15, 255],
         numAddresses: 4096,
-    }].map((network: NetworkInfo) => {
-        network.inputPrefix = `${network.stringAddress}/${network.prefix}`;
-        network.inputAddress = `${network.stringAddress}/${network.stringNetmask}`;
-        return network;
-    });
-})();
+    }, {
+        inputAddress: "192.168.0.40/255.255.248.0",
+        inputPrefix: "192.168.0.40/21",
+        stringAddress: "192.168.0.0",
+        octetsAddress: [192, 168, 0, 0],
+        prefix: 21,
+        stringNetmask: "255.255.248.0",
+        octetsNetmask: [255, 255, 248, 0],
+        stringHostmask: "0.0.7.255",
+        octetsHostmask: [0, 0, 7, 255],
+        stringBroadcast: "192.168.7.255",
+        octetsBroadcast: [192, 168, 7, 255],
+        numAddresses: 2048,
+    }]
+)();
 
 
 function testNetwork(check: (net: Network4) => void) {
