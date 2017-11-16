@@ -21,6 +21,7 @@ import {
  */
 export abstract class Address {
     private byteContainer: ByteContainer;
+    private _decimal: number;
 
     public constructor(byteContainer: ByteContainer) {
         this.byteContainer = byteContainer;
@@ -39,6 +40,24 @@ export abstract class Address {
      */
     public getOctets(): ReadonlyArray<number> {
         return this.byteContainer.bytes;
+    }
+
+    /**
+     * Returns the address in decimal format.
+     *
+     * WARNING!
+     * Due to Javascript limitations (and because I don't want to depend on a
+     * bignum library) this function may returns inaccurate results if the
+     * decimal address value is bigger than 2^53.
+     */
+    public getDecimal(): number {
+        if (typeof this._decimal === "undefined") {
+            this._decimal = this.getOctets().reduce(
+                (total, octet, index) => total + octet * (2 ** (8 * (4 - index - 1))),
+                0,
+            );
+        }
+        return this._decimal;
     }
 
     /**

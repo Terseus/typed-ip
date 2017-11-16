@@ -8,27 +8,77 @@ import {
 
 
 interface AddressInfo {
-    [address: string]: number[];
+    address: string;
+    octets: number[];
+    decimal: number;
 }
 
+/* tslint:disable:object-literal-sort-keys */
+const IPV4_VALID: AddressInfo[] = [
+    {
+        address: "0.0.0.0",
+        octets: [0, 0, 0, 0],
+        decimal: 0,
+    },
+    {
+        address: "127.0.0.1",
+        octets: [127, 0, 0, 1],
+        decimal: 2130706433,
+    },
+    {
+        address: "192.168.0.1",
+        octets: [192, 168, 0, 1],
+        decimal: 3232235521,
+    },
+    {
+        address: "255.255.255.0",
+        octets: [255, 255, 255, 0],
+        decimal: 4294967040,
+    },
+    {
+        address: "255.255.255.255",
+        octets: [255, 255, 255, 255],
+        decimal: 4294967295,
+    },
+];
 
-const IPV4_VALID: AddressInfo = {
-    "0.0.0.0": [0, 0, 0, 0],
-    "127.0.0.1": [127, 0, 0, 1],
-    "192.168.0.1": [192, 168, 0, 1],
-    "255.255.255.0": [255, 255, 255, 0],
-    "255.255.255.255": [255, 255, 255, 255],
-};
+
+function describeTestAddress(describeSuffix: string, addressConstructor: (data: AddressInfo) => Address4) {
+    describe(`public interface ${describeSuffix}`, function() {
+        it("should have the correct type", function() {
+            IPV4_VALID.forEach((data) => {
+                const address = addressConstructor(data);
+                assert(address instanceof Address);
+            });
+        });
+        it("should match string address", function() {
+            IPV4_VALID.forEach((data) => {
+                const address = addressConstructor(data);
+                assert.equal(address.getIpString(), data.address);
+            });
+        });
+        it("should match decimal address", function() {
+            IPV4_VALID.forEach((data) => {
+                const address = addressConstructor(data);
+                assert.equal(address.getIpString(), data.address);
+            });
+        });
+        it("should match octets", function() {
+            IPV4_VALID.forEach((data) => {
+                const address = addressConstructor(data);
+                assert.equal(address.getDecimal(), data.decimal);
+            });
+        });
+    });
+}
 
 
 describe("Address4", function() {
     describe("constructor from string", function() {
         it("should accept valid strings values", function() {
-            for (const ipString in IPV4_VALID) {
-                const ip = new Address4(ipString);
-                assert.deepEqual(ip.getOctets(), IPV4_VALID[ipString]);
-                assert.equal(ip.getIpString(), ipString);
-            }
+            IPV4_VALID.forEach((data) => {
+                const address = new Address4(data.address);
+            });
         });
         it("should reject invalid string values", function() {
             assert.throws(() => new Address4("256.0.0.0"), AddressValueError);
@@ -40,18 +90,13 @@ describe("Address4", function() {
     });
     describe("constructor from octets", function() {
         it("should accept valid octets values", function() {
-            for (const ipString in IPV4_VALID) {
-                const ip = new Address4(IPV4_VALID[ipString]);
-                assert.equal(ip.getIpString(), ipString);
-                assert.deepEqual(ip.getOctets(), IPV4_VALID[ipString]);
-            }
+            IPV4_VALID.forEach((data) => {
+                const address = new Address4(data.octets);
+            });
         });
         it("should reject invalid octets values", function() {
             assert.throws(() => new Address4([-1]), AddressValueError);
             assert.throws(() => new Address4([256, 0, 0, 0]), AddressValueError);
-        });
-        it("should be subclass of Address", function() {
-            assert(new Address4(IPV4_VALID[0]) instanceof Address);
         });
     });
     describe("arithmetic", function() {
@@ -94,10 +139,6 @@ describe("Address4", function() {
             assert(!new Address4("127.0.0.1").le(new Address4("127.0.0.0")));
         });
     });
-    describe("octets", function() {
-        it("should return correct octets", function() {
-            assert.deepEqual(Array.from(new Address4("127.0.0.1").getOctets()), [127, 0, 0, 1]);
-            assert.deepEqual(Array.from(new Address4("255.255.255.255").getOctets()), [255, 255, 255, 255]);
-        });
-    });
+    describeTestAddress("from string", (data: AddressInfo) => new Address4(data.address));
+    describeTestAddress("from octets", (data: AddressInfo) => new Address4(data.octets));
 });

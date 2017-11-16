@@ -78,14 +78,6 @@ const IPV4_NETWORKS_VALID: NetworkInfo[] = (() => [{
 )();
 
 
-function testNetwork(check: (net: Network4) => void) {
-    IPV4_NETWORKS_VALID.forEach((data) => {
-        check(new Network4(data.inputPrefix));
-        check(new Network4(data.inputAddress));
-    });
-}
-
-
 function describeTestNetwork(describeSuffix: string, inputAccessor: (data: NetworkInfo) => string) {
     describe(`public interface ${describeSuffix}`, function() {
         it("should have the correct types", function() {
