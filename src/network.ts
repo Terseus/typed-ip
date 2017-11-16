@@ -89,8 +89,8 @@ export abstract class Network<AddressType extends Address> {
     public getBroadcast(): AddressType {
         if (typeof this._broadcast === "undefined") {
             this._broadcast = new this.addressConstructor(new ByteContainer(
-                Array.from(this.getAddress().getOctets().keys()).map(
-                    (key) => this.getAddress().getOctets()[key] | this.getWildcard().getOctets()[key],
+                this.getAddress().getOctets().map(
+                    (value, index) => value | this.getWildcard().getOctets()[index],
                 ),
             ));
         }
