@@ -3,7 +3,7 @@ tsipaddr
 
 A Typescript library with zero dependencies to parse and manipulate IP addresses.
 
-This project is *NOT* ready for production right now, it's missing functionality and you must expect changes to the public interfaces.
+This project is **NOT** ready for production right now, it's missing functionality and you must expect changes to the public interfaces.
 
 
 Installing
