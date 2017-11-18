@@ -1,3 +1,6 @@
+const DECIMAL_REGEXP = /^\d+$/;
+
+
 /**
  * @hidden
  */
@@ -6,12 +9,24 @@ export const enum comparison {
 }
 
 
-function checkInputArray(input: ReadonlyArray<number>): void {
-    input.forEach((digit) => {
-        if (digit < 0 || digit > 255) {
-            throw new Error("Invalid bytes array: digits should be between 0 and 255");
-        }
-    });
+/**
+ * @hidden
+ */
+export function isValidByte(input: number) {
+    return (input >= 0 && input <= 255);
+}
+
+
+/**
+ * @hidden
+ */
+export function isValidByteArray(input: ReadonlyArray<number>): boolean {
+    return input.every(isValidByte);
+}
+
+
+export function isDecimalString(input: string): boolean {
+    return DECIMAL_REGEXP.test(input);
 }
 
 
@@ -48,7 +63,9 @@ export class ByteContainer {
         if (input.length > this.length) {
             throw new Error("Unsupported operation: input cannot have more elements than this");
         }
-        checkInputArray(input);
+        if (!isValidByteArray(input)) {
+            throw new Error("Invalid bytes array: digits should be between 0 and 255");
+        }
         if (this.length > input.length) {
             input = new Array(this.length - input.length).fill(0x00).concat(input);
         }
@@ -82,7 +99,9 @@ export class ByteContainer {
         if (input.length > this.length) {
             throw new Error("Unsupported operation: input cannot have more elements than this");
         }
-        checkInputArray(input);
+        if (!isValidByteArray(input)) {
+            throw new Error("Invalid bytes array: digits should be between 0 and 255");
+        }
         if (this.length > input.length) {
             input = new Array(this.length - input.length).fill(0x00).concat(input);
         }

@@ -1,6 +1,9 @@
 import {
     ByteContainer,
     comparison,
+    isDecimalString,
+    isValidByte,
+    isValidByteArray,
 } from "./arrays";
 
 import {
@@ -8,7 +11,6 @@ import {
 } from "./exceptions";
 
 import {
-    DECIMAL_DIGITS,
     IPV4_BYTES,
 } from "./constants";
 
@@ -160,11 +162,11 @@ export class Address4 extends Address {
             if (input.length > IPV4_BYTES) {
                 throw new AddressValueError(input);
             }
-            if (!input.every((octet) => this.isValidOctet(octet))) {
+            if (!isValidByteArray(input)) {
                 throw new AddressValueError(input);
             }
             if (input.length < IPV4_BYTES) {
-                input = Array(IPV4_BYTES - input.length).fill(0x00).concat(input);
+                input = Array(IPV4_BYTES - input.length).fill(0).concat(input);
             }
             super(new ByteContainer(input));
         } else if (typeof input === "string") {
@@ -175,12 +177,12 @@ export class Address4 extends Address {
 
             const octets = new ByteContainer(addressSplitted.map(
                 (octet) => {
-                    if (!Array.from(octet).every((ch) => DECIMAL_DIGITS.includes(ch))) {
+                    if (!isDecimalString(octet)) {
                         throw new AddressValueError(input as string);
                     }
 
                     const numberOctet = parseInt(octet, 10);
-                    if (!this.isValidOctet(numberOctet)) {
+                    if (!isValidByte(numberOctet)) {
                         throw new AddressValueError(input as string);
                     }
 
@@ -196,9 +198,5 @@ export class Address4 extends Address {
             this._ipString = this.getOctets().join(".");
         }
         return this._ipString;
-    }
-
-    private isValidOctet(octet: number): boolean {
-        return octet >= 0 && octet <= 255;
     }
 }

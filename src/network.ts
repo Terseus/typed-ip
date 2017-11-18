@@ -1,5 +1,6 @@
 import {
     ByteContainer,
+    isDecimalString,
 } from "./arrays";
 
 import {
@@ -12,7 +13,6 @@ import {
 } from "./exceptions";
 
 import {
-    DECIMAL_DIGITS,
     IPV4_BYTES,
     IPV4_LENGTH,
     NETMASK_OCTETS,
@@ -168,7 +168,7 @@ export class Network4 extends Network<Address4> {
 
         const inputAddress = new Address4(subaddress);
         let netmask: Address4;
-        if (Array.from(subnetmask).every((ch) => DECIMAL_DIGITS.includes(ch))) {
+        if (isDecimalString(subnetmask)) {
             const prefix = parseInt(subnetmask, 10);
             if (prefix < 0 || prefix > IPV4_LENGTH) {
                 throw new AddressValueError(subnetmask);
