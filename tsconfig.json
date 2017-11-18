@@ -5,11 +5,13 @@
         "module": "commonjs",
         "declaration": true,
         "sourceMap": true,
+        "downlevelIteration": true,
         "types": [
             "node",
             "mocha"
         ],
         "lib": [
+            "es2017",
             "es2016",
             "dom"
         ]

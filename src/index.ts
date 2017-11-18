@@ -1,6 +1,7 @@
 export {
     Address,
     Address4,
+    Address6,
 } from "./address";
 
 export {

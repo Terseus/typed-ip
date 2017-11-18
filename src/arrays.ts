@@ -1,4 +1,5 @@
 const DECIMAL_REGEXP = /^\d+$/;
+const HEXADECIMAL_REGEXP = /^[\dabcdef]+$/i;
 
 
 /**
@@ -27,6 +28,11 @@ export function isValidByteArray(input: ReadonlyArray<number>): boolean {
 
 export function isDecimalString(input: string): boolean {
     return DECIMAL_REGEXP.test(input);
+}
+
+
+export function isHexadecimalString(input: string): boolean {
+    return HEXADECIMAL_REGEXP.test(input);
 }
 
 

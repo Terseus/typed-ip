@@ -60,13 +60,13 @@ function describeTestAddress(describeSuffix: string, addressConstructor: (data: 
         it("should match decimal address", function() {
             IPV4_VALID.forEach((data) => {
                 const address = addressConstructor(data);
-                assert.equal(address.getIpString(), data.address);
+                assert.equal(address.getDecimal(), data.decimal);
             });
         });
         it("should match octets", function() {
             IPV4_VALID.forEach((data) => {
                 const address = addressConstructor(data);
-                assert.equal(address.getDecimal(), data.decimal);
+                assert.deepEqual(address.getOctets(), data.octets);
             });
         });
     });
