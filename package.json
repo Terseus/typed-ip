@@ -3,9 +3,10 @@
     "version": "0.1.0",
     "scripts": {
         "lint": "tslint -c tslint.json -t verbose -p tsconfig.json",
-        "test": "npm run build && mocha dist/tests/*.js",
+        "test": "ts-mocha tests/*.ts",
+        "test-js": "npm run build && mocha dist/tests/*.js",
         "build": "npm run clean && tsc --outDir dist/",
-        "pack": "npm run build && npm pack",
+        "pack": "npm run test-js && npm pack",
         "clean": "rm -rf dist/",
         "cleandoc": "rm -rf docs/",
         "doc": "npm run cleandoc && typedoc src/ --readme none"
@@ -22,6 +23,7 @@
         "babel-cli": "^6.24.1",
         "babel-preset-env": "^1.5.1",
         "mocha": "^3.4.2",
+        "ts-mocha": "^1.0.3",
         "tslint": "^5.4.3",
         "typedoc": "^0.9.0",
         "typescript": "^2.3.4"
