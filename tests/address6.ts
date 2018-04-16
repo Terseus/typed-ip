@@ -58,6 +58,13 @@ const IPV6_VALID: AddressInfo[] = [
         addressFull: "0000:0000:ffff:ffff:ffff:ffff:ffff:ffff",
         addressRfc5952: "::ffff:ffff:ffff:ffff:ffff:ffff",
     },
+    {
+        address: "ffff:ffff:ffff:ffff:ffff:ffff::",
+        octets: [255, 255, 255, 255, 255, 255, 255, 255,
+                 255, 255, 255, 255, 0, 0, 0, 0],
+        addressFull: "ffff:ffff:ffff:ffff:ffff:ffff:0000:0000",
+        addressRfc5952: "ffff:ffff:ffff:ffff:ffff:ffff::",
+    },
 ];
 
 

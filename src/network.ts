@@ -6,6 +6,7 @@ import {
 import {
     Address,
     Address4,
+    Address6,
 } from "./address";
 
 import {
@@ -15,6 +16,8 @@ import {
 import {
     IPV4_BYTES,
     IPV4_LENGTH,
+    IPV6_BYTES,
+    IPV6_LENGTH,
     NETMASK_OCTETS,
 } from "./constants";
 
@@ -193,5 +196,41 @@ export class Network4 extends Network<Address4> {
             (value, index) => value & netmask.getOctets()[index],
         ));
         super(address, netmask, Address4);
+    }
+}
+
+
+export class Network6 extends Network<Address6> {
+    /**
+     * Constructs a new network instance.
+     *
+     * The input should be a string representing the network address in the
+     * form of "address/prefix".
+     */
+    public constructor(input: string) {
+        const [subaddress, subprefix, nothing] = input.split("/");
+        if (typeof nothing !== "undefined") {
+            throw new AddressValueError(input);
+        }
+        if (typeof subprefix === "undefined") {
+            throw new AddressValueError(input);
+        }
+
+        const address = new Address6(subaddress);
+        const prefix = parseInt(subprefix, 10);
+        if (prefix < 0 || prefix > IPV6_LENGTH) {
+            throw new AddressValueError(input);
+        }
+        const fullBytes = Math.floor(prefix / 8);
+        const partialByte = prefix % 8;
+        const bytes: number[] = new Array(IPV6_BYTES).fill(0);
+        if (fullBytes > 0) {
+            bytes.fill(0xff, 0, fullBytes);
+        }
+        if (partialByte > 0) {
+            bytes[IPV6_BYTES - fullBytes] = NETMASK_OCTETS[partialByte];
+        }
+        const netmask = new Address6(bytes);
+        super(address, netmask, Address6);
     }
 }
