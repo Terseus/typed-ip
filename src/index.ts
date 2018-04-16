@@ -7,6 +7,7 @@ export {
 export {
     Network,
     Network4,
+    Network6,
 } from "./network";
 
 export {

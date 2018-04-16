@@ -7,7 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Added
 - Add `getDecimal` function to `Address4`.
-- Add `Address6` class, initial IPv6 support.
+- Add `Address6` and `Network6` classes, initial IPv6 support.
+- Add `getFullString` and `getRfc5952` to `Address6`.
 ### Changed
 - Small optimization in broadcast address calculation.
 
