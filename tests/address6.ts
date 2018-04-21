@@ -1,4 +1,4 @@
-import * as assert from "assert";
+import { assert } from "chai";
 
 import {
     Address,
@@ -71,27 +71,17 @@ const IPV6_VALID: AddressInfo[] = [
 function describeTestAddress(describeSuffix: string, addressConstructor: (data: AddressInfo) => Address6) {
     describe(`public interface ${describeSuffix}`, function() {
         it("should have the correct type", function() {
-            IPV6_VALID.forEach((data) => {
-                const address = addressConstructor(data);
-                assert(address instanceof Address);
-            });
+            assert.instanceOf(addressConstructor(IPV6_VALID[0]), Address);
         });
-        it("should match octets", function() {
-            IPV6_VALID.forEach((data) => {
-                const address = addressConstructor(data);
-                assert.deepEqual(address.getOctets(), data.octets);
+        IPV6_VALID.forEach((input) => {
+            it(`${input.address} should match octets ${input.octets}`, function() {
+                assert.deepEqual(addressConstructor(input).getOctets(), input.octets);
             });
-        });
-        it("should match full string address", function() {
-            IPV6_VALID.forEach((data) => {
-                const address = addressConstructor(data);
-                assert.equal(address.getFullString(), data.addressFull);
+            it(`${input.address} should match full string address ${input.addressFull}`, function() {
+                assert.deepEqual(addressConstructor(input).getFullString(), input.addressFull);
             });
-        });
-        it("should match RFC 5952 string address", function() {
-            IPV6_VALID.forEach((data) => {
-                const address = addressConstructor(data);
-                assert.equal(address.getRfc5952(), data.addressRfc5952);
+            it(`${input.address} should match RFC 5952 string address ${input.addressRfc5952}`, function() {
+                assert.deepEqual(addressConstructor(input).getRfc5952(), input.addressRfc5952);
             });
         });
     });
