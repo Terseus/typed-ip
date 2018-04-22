@@ -3,8 +3,8 @@
     "version": "0.1.0",
     "scripts": {
         "lint": "tslint -c tslint.json -t verbose -p tsconfig.json",
-        "test": "ts-mocha tests/*.ts",
-        "test-js": "npm run build && mocha dist/tests/*.js",
+        "test": "nyc ts-mocha tests/*.ts",
+        "test-js": "npm run build && nyc mocha dist/tests/*.js",
         "build": "npm run clean && tsc --outDir dist/",
         "pack": "npm run test-js && npm pack",
         "clean": "rm -rf dist/",
@@ -25,9 +25,22 @@
         "babel-preset-env": "^1.5.1",
         "chai": "^4.1.2",
         "mocha": "^5.1.1",
+        "nyc": "^11.7.1",
         "ts-mocha": "^1.0.3",
         "tslint": "^5.4.3",
         "typedoc": "^0.11.1",
         "typescript": "^2.3.4"
+    },
+    "nyc": {
+        "extension": [
+            ".ts",
+            ".tsx"
+        ],
+        "exclude": [
+            "**/*.d.ts"
+        ],
+        "reporter": [
+            "html"
+        ]
     }
 }
