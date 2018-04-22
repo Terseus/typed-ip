@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.3.2]
+### Changed
+* Change README from reStructuredText to Markdown for compatibility with npmjs.com
+
 ## [0.3.1]
 ### Added
 * Add `chai` assert library.
