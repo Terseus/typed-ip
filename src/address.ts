@@ -35,7 +35,7 @@ function hexOctetToString(octet: number): string {
  */
 export abstract class Address {
     private byteContainer: ByteContainer;
-    private _decimal: number;
+    private _decimal: number|undefined;
 
     public constructor(byteContainer: ByteContainer) {
         this.byteContainer = byteContainer;
@@ -157,7 +157,7 @@ export abstract class Address {
  * The objects of this class are meant to be immutable.
  */
 export class Address4 extends Address {
-    private _ipString: string;
+    private _ipString: string|undefined;
 
     /**
      * Creates a new IPv4 address.
@@ -220,8 +220,8 @@ export class Address4 extends Address {
  * The objects of this class are meant to be immutable.
  */
 export class Address6 extends Address {
-    private _fullString: string;
-    private _rfc5952: string;
+    private _fullString: string|undefined;
+    private _rfc5952: string|undefined;
 
     /**
      * Creates a new IPv6 address.

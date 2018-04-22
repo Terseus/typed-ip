@@ -32,10 +32,10 @@ export abstract class Network<AddressType extends Address> {
     private addressConstructor: {new(input: ByteContainer): AddressType};
     private _address: AddressType;
     private _netmask: AddressType;
-    private _prefix: number;
-    private _wildcard: AddressType;
-    private _broadcast: AddressType;
-    private _numAddresses: number;
+    private _prefix: number|undefined;
+    private _wildcard: AddressType|undefined;
+    private _broadcast: AddressType|undefined;
+    private _numAddresses: number|undefined;
 
     protected constructor(
         address: AddressType,
