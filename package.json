@@ -40,7 +40,9 @@
             "**/*.d.ts"
         ],
         "reporter": [
-            "html"
+            "html",
+            "text",
+            "text-summary"
         ]
     }
 }
