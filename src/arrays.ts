@@ -26,11 +26,17 @@ export function isValidByteArray(input: ReadonlyArray<number>): boolean {
 }
 
 
+/**
+ * @hidden
+ */
 export function isDecimalString(input: string): boolean {
     return DECIMAL_REGEXP.test(input);
 }
 
 
+/**
+ * @hidden
+ */
 export function isHexadecimalString(input: string): boolean {
     return HEXADECIMAL_REGEXP.test(input);
 }
