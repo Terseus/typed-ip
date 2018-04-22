@@ -1,6 +1,6 @@
 {
     "name": "tsipaddr",
-    "version": "0.1.0",
+    "version": "0.3.1",
     "scripts": {
         "lint": "tslint -c tslint.json -t verbose -p tsconfig.json",
         "test": "nyc ts-mocha tests/*.ts",
