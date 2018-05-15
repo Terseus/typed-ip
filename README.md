@@ -1,4 +1,4 @@
-# tsipaddr
+# typed-ip
 
 A Typescript library with zero dependencies to parse and manipulate IP addresses.
 
@@ -8,7 +8,7 @@ This project is **NOT** ready for production right now, you may expect changes t
 ## Installing
 
 ```shell
-$ yarn install tsipaddr
+$ yarn install typed-ip
 ```
 
 
