@@ -8,3 +8,7 @@ tags
 dist/tests/
 yarn.lock
 docs/
+coverage/
+benchmarks/
+.nyc_output/
+.travis.yml
